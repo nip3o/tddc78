@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:blur_fproxy.c">
+   </FileRef>
+   <FileRef
+      location = "group:blurfilter_f.f90">
+   </FileRef>
+   <FileRef
+      location = "group:blurfilter.c">
+   </FileRef>
+   <FileRef
+      location = "group:blurfilter.h">
+   </FileRef>
+   <FileRef
+      location = "group:blurmain.c">
+   </FileRef>
+   <FileRef
+      location = "group:gaussw.c">
+   </FileRef>
+   <FileRef
+      location = "group:gaussw.h">
+   </FileRef>
+   <FileRef
+      location = "group:Makefile">
+   </FileRef>
+   <FileRef
+      location = "group:Makefile.sgi">
+   </FileRef>
+   <FileRef
+      location = "group:ppm.c">
+   </FileRef>
+   <FileRef
+      location = "group:ppm.h">
+   </FileRef>
+   <FileRef
+      location = "group:ppmio.c">
+   </FileRef>
+   <FileRef
+      location = "group:ppmio.h">
+   </FileRef>
+   <FileRef
+      location = "group:thres_fproxy.c">
+   </FileRef>
+   <FileRef
+      location = "group:thresfilter_f.f90">
+   </FileRef>
+   <FileRef
+      location = "group:thresfilter.c">
+   </FileRef>
+   <FileRef
+      location = "group:thresfilter.h">
+   </FileRef>
+   <FileRef
+      location = "group:thresmain.c">
+   </FileRef>
+</Workspace>
