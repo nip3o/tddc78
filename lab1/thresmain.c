@@ -35,9 +35,11 @@ int main (int argc, char ** argv) {
     MPI_Type_create_struct(3, blocklen, disp, type, &pixel_mpi);
     MPI_Type_commit(&pixel_mpi);
 
-
+    int buffsize = 10;
+    
     /* Take care of the arguments */
     if (taskid == ROOT) {
+        printf("I am root =)\n");
         if (argc != 3) {
     	fprintf(stderr, "Usage: %s infile outfile\n", argv[0]);
     	exit(1);
@@ -52,11 +54,12 @@ int main (int argc, char ** argv) {
     	exit(1);
         }
 
+        buffsize = xsize * ysize / ntasks + 1;
     }
+    printf("buffsize: %i, xsize: %i, ysize: %i, ntasks: %i\n", buffsize, xsize, ysize, ntasks);
 
     pixel recvbuff[MAX_PIXELS];
 
-    int buffsize = sizeof(src) / sizeof(pixel) / ntasks;
 
     MPI_Scatter(src, buffsize, pixel_mpi, 
                 recvbuff, buffsize, pixel_mpi,
@@ -76,7 +79,7 @@ int main (int argc, char ** argv) {
 
     clock_gettime(CLOCK_REALTIME, &stime);
 
-    thresfilter(400, 400, src);
+    thresfilter(buffsize, src);
 
     clock_gettime(CLOCK_REALTIME, &etime);
 

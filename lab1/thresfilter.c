@@ -1,11 +1,9 @@
 #include "thresfilter.h"
 
-void thresfilter(const int xsize, const int ysize, pixel* src){
+void thresfilter(const int nump, pixel* src){
 #define uint unsigned int 
 
-  uint sum, i, psum, nump;
-
-  nump = xsize * ysize;
+  uint sum, i, psum;
 
   for(i = 0, sum = 0; i < nump; i++) {
     sum += (uint)src[i].r + (uint)src[i].g + (uint)src[i].b;
