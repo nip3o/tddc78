@@ -15,6 +15,7 @@ void thresfilter(const int xsize, const int ysize, pixel* src){
 
   for(i = 0; i < nump; i++) {
     psum = (uint)src[i].r + (uint)src[i].g + (uint)src[i].b;
+      
     if(sum > psum) {
       src[i].r = src[i].g = src[i].b = 0;
     }
