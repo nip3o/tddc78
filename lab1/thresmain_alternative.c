@@ -57,6 +57,7 @@ int main (int argc, char ** argv) {
     pixel recvbuff[MAX_PIXELS];
 
     int buffsize = sizeof(src) / sizeof(pixel) / ntasks;
+    printf("buffsize: %i\n", buffsize);
 
     MPI_Scatter(src, buffsize, pixel_mpi, 
                 recvbuff, buffsize, pixel_mpi,
