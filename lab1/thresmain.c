@@ -35,14 +35,13 @@ int main (int argc, char ** argv) {
     MPI_Type_create_struct(3, blocklen, disp, type, &pixel_mpi);
     MPI_Type_commit(&pixel_mpi);
 
-    int buffsize = 10;
+    int buffsize;
     
     /* Take care of the arguments */
     if (taskid == ROOT) {
-        printf("I am root =)\n");
         if (argc != 3) {
-    	fprintf(stderr, "Usage: %s infile outfile\n", argv[0]);
-    	exit(1);
+        	fprintf(stderr, "Usage: %s infile outfile\n", argv[0]);
+        	exit(1);
         }
 
         /* read file */
@@ -50,30 +49,20 @@ int main (int argc, char ** argv) {
             exit(1);
 
         if (colmax > 255) {
-    	fprintf(stderr, "Too large maximum color-component value\n");
-    	exit(1);
+        	fprintf(stderr, "Too large maximum color-component value\n");
+        	exit(1);
         }
 
         buffsize = xsize * ysize / ntasks + 1;
     }
-    printf("buffsize: %i, xsize: %i, ysize: %i, ntasks: %i\n", buffsize, xsize, ysize, ntasks);
+    
+    MPI_Bcast(&buffsize, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
 
     pixel recvbuff[MAX_PIXELS];
 
-
     MPI_Scatter(src, buffsize, pixel_mpi, 
                 recvbuff, buffsize, pixel_mpi,
-                0, MPI_COMM_WORLD);
-
-//MPI_Scatter(sendbuff[0],buffsize,MPI_DOUBLE,
-//                   recvbuff,buffsize,MPI_DOUBLE,
-//                   0,MPI_COMM_WORLD);
-
-//MPI_Gather(&buffsum,1,MPI_DOUBLE,
-//                   buffsums,1, MPI_DOUBLE,
-//                   0,MPI_COMM_WORLD);
-
-
+                ROOT, MPI_COMM_WORLD);
 
     printf("Has read the image, calling filter\n");
 
@@ -83,9 +72,11 @@ int main (int argc, char ** argv) {
 
     clock_gettime(CLOCK_REALTIME, &etime);
 
+    printf("buffsize: %i, xsize: %i, ysize: %i, ntasks: %i\n", buffsize, xsize, ysize, ntasks);
+
     MPI_Gather(src, buffsize, pixel_mpi,
                recvbuff, buffsize, pixel_mpi,
-               0, MPI_COMM_WORLD);
+               ROOT, MPI_COMM_WORLD);
 
     if (taskid == ROOT) {
         printf("Filtering took: %g secs\n", (etime.tv_sec  - stime.tv_sec) +
