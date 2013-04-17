@@ -78,6 +78,8 @@ int main (int argc, char ** argv) {
     MPI_Bcast(&buffsize, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
     MPI_Bcast(&radius, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
     MPI_Bcast(w, MAX_RAD, MPI_DOUBLE, ROOT, MPI_COMM_WORLD);
+    MPI_Bcast(&xsize, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
+    MPI_Bcast(&ysize, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
 
     printf("Har ar en jattefin radius!! : %i, buffsize: %i\n", radius, buffsize);
 
