@@ -6,17 +6,18 @@
 #include "blurfilter.h"
 #include "gaussw.h"
 #include "mpi.h"
+
 #define ROOT 0
+#define MAX_RAD 1000
 
 int main (int argc, char ** argv) {
-   int radius, taskid, ntasks;
+   int taskid, ntasks;
 
     int xsize, ysize, colmax;
     pixel src[MAX_PIXELS];
-    struct timespec stime, etime;
-#define MAX_RAD 1000
-
     double w[MAX_RAD];
+
+    struct timespec stime, etime;
 
 
     MPI_Init(&argc, &argv);
@@ -41,7 +42,7 @@ int main (int argc, char ** argv) {
     MPI_Type_struct(3, blocklen, disp, type, &pixel_mpi);
     MPI_Type_commit(&pixel_mpi);
 
-    int buffsize;
+    int buffsize, radius;
 
     /* Take care of the arguments */
 
@@ -66,16 +67,19 @@ int main (int argc, char ** argv) {
         }
 
         buffsize = xsize * ysize / ntasks + 1;
+
+        /* filter */
+        printf("Has read the image, generating coefficients\n");
+        get_gauss_weights(radius, w);
     }
-
-    printf("Has read the image, generating coefficients\n");
-
-    /* filter */
-    get_gauss_weights(radius, w);
 
     printf("Calling filter\n");
     
     MPI_Bcast(&buffsize, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
+    MPI_Bcast(&radius, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
+    MPI_Bcast(w, MAX_RAD, MPI_DOUBLE, ROOT, MPI_COMM_WORLD);
+
+    printf("Har ar en jattefin radius!! : %i, buffsize: %i\n", radius, buffsize);
 
     pixel recvbuff[MAX_PIXELS];
 
