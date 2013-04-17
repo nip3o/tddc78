@@ -11,28 +11,29 @@
 
 int main (int argc, char ** argv) {
     int xsize, ysize, colmax, taskid, ntasks;
-    pixel src[MAX_PIXELS];
-    struct timespec stime, etime;
-
-    MPI_Datatype pixel_mpi;
-    MPI_Datatype type[3] = { MPI_UNSIGNED_CHAR, MPI_UNSIGNED_CHAR, MPI_UNSIGNED_CHAR };
-    int blocklen[3] = { 1, 1, 1 };
-    MPI_Aint start, disp[3];
- 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
     MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
 
-    MPI_Address( &src[0], &start );
-    MPI_Address( &src[0].r, &disp[0] );
-    MPI_Address( &src[0].g, &disp[1] );
-    MPI_Address( &src[0].b, &disp[2] );
+    pixel src[MAX_PIXELS];
+    struct timespec stime, etime;
+
+    pixel item;
+    MPI_Datatype pixel_mpi;
+    MPI_Datatype type[3] = { MPI_UNSIGNED_CHAR, MPI_UNSIGNED_CHAR, MPI_UNSIGNED_CHAR };
+    int blocklen[] = { 1, 1, 1 };
+    MPI_Aint start, disp[3];
+
+    MPI_Address( &item, &start );
+    MPI_Address( &item.r, &disp[0] );
+    MPI_Address( &item.g, &disp[1] );
+    MPI_Address( &item.b, &disp[2] );
  
     disp[0] -= start;
     disp[1] -= start;
     disp[2] -= start;
 
-    MPI_Type_create_struct(3, blocklen, disp, type, &pixel_mpi);
+    MPI_Type_struct(3, blocklen, disp, type, &pixel_mpi);
     MPI_Type_commit(&pixel_mpi);
 
     int buffsize;
