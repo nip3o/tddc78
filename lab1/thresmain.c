@@ -69,13 +69,26 @@ int main (int argc, char ** argv) {
 
     clock_gettime(CLOCK_REALTIME, &stime);
 
-    thresfilter(buffsize, src);
+    int i;
+    unsigned int threshold_level;
+    if (taskid == ROOT) {
+
+      for(i = 0, threshold_level = 0; i < buffsize; i++) {
+        threshold_level += (uint)src[i].r + (uint)src[i].g + (uint)src[i].b;
+      }
+
+      threshold_level /= buffsize;
+    }
+
+    MPI_Bcast(&threshold_level, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
+
+    thresfilter(buffsize, recvbuff, threshold_level);
 
     clock_gettime(CLOCK_REALTIME, &etime);
 
     printf("buffsize: %i, xsize: %i, ysize: %i, ntasks: %i\n", buffsize, xsize, ysize, ntasks);
 
-    MPI_Gather(src, buffsize, pixel_mpi,
+    MPI_Gather(recvbuff, buffsize, pixel_mpi,
                recvbuff, buffsize, pixel_mpi,
                ROOT, MPI_COMM_WORLD);
 
