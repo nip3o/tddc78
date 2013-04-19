@@ -81,24 +81,34 @@ int main (int argc, char ** argv) {
 
     pixel recvbuff[MAX_PIXELS];
 
-    MPI_Scatter(src, buffsize, pixel_mpi, 
+    int sendcnts[ntasks], displs[ntasks];
+    int i;
+    for (i = 0; i < ntasks; i++) {
+        sendcnts[i] = buffsize;
+        displs[i] = i * buffsize;
+    }
+
+    MPI_Scatterv(src, sendcnts, displs, 
+                 pixel_mpi, recvbuff, buffsize,
+                 pixel_mpi, ROOT, MPI_COMM_WORLD);
+
+/*    MPI_Scatter(src, buffsize, pixel_mpi, 
                 recvbuff, buffsize, pixel_mpi,
-                ROOT, MPI_COMM_WORLD);
+                ROOT, MPI_COMM_WORLD);*/
 
     clock_gettime(CLOCK_REALTIME, &stime);
 
-    startY = (taskid) * (ysize / ntasks);
-    endY = (taskid + 1) * (ysize / ntasks);
-
-    printf("x = %i, ysize: %i, buffsize: %i, startY: %i, endY: %i, from: %i, radius: %i\n", xsize, ysize, buffsize, startY, endY, taskid, radius);
-
-    blurfilter(xsize, 0, (ysize / ntasks)+1, recvbuff, radius, w, taskid);
+    blurfilter(xsize, (ysize / ntasks) + 1, recvbuff, radius, w);
 
     clock_gettime(CLOCK_REALTIME, &etime);
 
-    MPI_Gather(recvbuff, buffsize, pixel_mpi,
-               recvbuff, buffsize, pixel_mpi,
-               ROOT, MPI_COMM_WORLD);
+    MPI_Gatherv(recvbuff, buffsize, pixel_mpi, 
+                src, sendcnts, displs, 
+                pixel_mpi, ROOT, MPI_COMM_WORLD);
+
+/*    MPI_Gather(recvbuff, buffsize, pixel_mpi,
+               src, buffsize, pixel_mpi,
+               ROOT, MPI_COMM_WORLD);*/
 
     printf("Filtering took: %g secs\n", (etime.tv_sec  - stime.tv_sec) +
 	   1e-9*(etime.tv_nsec  - stime.tv_nsec)) ;
@@ -106,8 +116,10 @@ int main (int argc, char ** argv) {
     /* write result */
     if (taskid == ROOT) {
         printf("Writing output file\n");
+
+        
     
-        if(write_ppm (argv[3], xsize, ysize, (char *)recvbuff) != 0)
+        if(write_ppm (argv[3], xsize, ysize, (char *)src) != 0)
           exit(1);
     }
 

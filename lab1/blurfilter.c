@@ -21,14 +21,14 @@ pixel* pix(pixel* image, const int xx, const int yy, const int xsize)
   return (image + off);
 }
 
-void blurfilter(const int xsize, const int startY, const int endY, pixel* src, const int radius, const double *w, const int taskid){
+void blurfilter(const int xsize, const int endY, pixel* src, const int radius, const double *w){
   int x,y,x2,y2, wi;
   double r,g,b,n, wc;
   pixel dst[MAX_PIXELS];
 
-    printf("StartY: %i, endY: %i, taskid: %i, r: %i, g: %i, b: %i\n", startY, endY, taskid, pix(src, 20, 20, xsize)->r, pix(src, 20, 20, xsize)->g, pix(src, 20, 20, xsize)->b);
+    //printf("StartY: %i, endY: %i, taskid: %i, r: %i, g: %i, b: %i\n", startY, endY, taskid, pix(src, 20, 20, xsize)->r, pix(src, 20, 20, xsize)->g, pix(src, 20, 20, xsize)->b);
     
-    for (y = startY; y < endY; y++) {
+    for (y = 0; y < endY; y++) {
         for (x = 0; x < xsize; x++) {
             r = w[0] * pix(src, x, y, xsize)->r;
             g = w[0] * pix(src, x, y, xsize)->g;
@@ -57,7 +57,7 @@ void blurfilter(const int xsize, const int startY, const int endY, pixel* src, c
         }
     }
 
-    for (y = startY; y < endY; y++) {
+    for (y = 0; y < endY; y++) {
         for (x = 0; x < xsize; x++) {
             r = w[0] * pix(dst, x, y, xsize)->r;
             g = w[0] * pix(dst, x, y, xsize)->g;
@@ -86,7 +86,7 @@ void blurfilter(const int xsize, const int startY, const int endY, pixel* src, c
         }
     }
 
-    printf("StartY: %i, endY: %i, taskid: %i, r: %i, g: %i, b: %i\n", startY, endY, taskid, pix(src, 20, 20, xsize)->r, pix(src, 20, 20, xsize)->g, pix(src, 20, 20, xsize)->b);
+    //printf("StartY: %i, endY: %i, taskid: %i, r: %i, g: %i, b: %i\n", startY, endY, taskid, pix(src, 20, 20, xsize)->r, pix(src, 20, 20, xsize)->g, pix(src, 20, 20, xsize)->b);
     
 }
 
