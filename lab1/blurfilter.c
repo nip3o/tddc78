@@ -29,7 +29,7 @@ void blurfilter(const int xsize, const int endY, pixel* src, const int radius, c
   double r,g,b,n, wc;
   pixel dst[MAX_PIXELS];
 
-    printf("-radius: %i, endY: %i, taskid: %i\n", -radius, endY + 2*radius, taskid);
+    //printf("-radius: %i, endY: %i, taskid: %i\n", -radius, endY + 2*radius, taskid);
     
     for (y = 0; y < endY + 2 * radius; y++) {
         for (x = 0; x < xsize; x++) {

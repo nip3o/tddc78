@@ -87,7 +87,7 @@ int main (int argc, char ** argv) {
     int sendcnts[ntasks], displs[ntasks];
     int i;
     for (i = 0; i < ntasks; i++) {
-        printf("disp: %i, sendcnts: %i, buffsize: %i, taskid: %i\n", i*buffsize-radius*xsize, buffsize + radius*xsize, buffsize, taskid);
+        //printf("disp: %i, sendcnts: %i, buffsize: %i, taskid: %i\n", i*buffsize-radius*xsize, buffsize + radius*xsize, buffsize, taskid);
         sendcnts[i] = buffsize + 4 * radius * xsize;
         displs[i] = max(0, i * buffsize - 2 * radius * xsize);
     }
