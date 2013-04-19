@@ -88,12 +88,12 @@ int main (int argc, char ** argv) {
     int i;
     for (i = 0; i < ntasks; i++) {
         printf("disp: %i, sendcnts: %i, buffsize: %i, taskid: %i\n", i*buffsize-radius*xsize, buffsize + radius*xsize, buffsize, taskid);
-        sendcnts[i] = buffsize + radius * xsize;
-        displs[i] = max(0, i * buffsize - radius * xsize);
+        sendcnts[i] = buffsize + 4 * radius * xsize;
+        displs[i] = max(0, i * buffsize - 2 * radius * xsize);
     }
 
     MPI_Scatterv(src, sendcnts, displs, 
-                 pixel_mpi, recvbuff, buffsize + radius * xsize,
+                 pixel_mpi, recvbuff, buffsize + 4 * radius * xsize,
                  pixel_mpi, ROOT, MPI_COMM_WORLD);
 
 /*    MPI_Scatter(src, buffsize, pixel_mpi, 
@@ -102,22 +102,25 @@ int main (int argc, char ** argv) {
 
     clock_gettime(CLOCK_REALTIME, &stime);
 
-    blurfilter(xsize, (ysize / ntasks) + 1, recvbuff, radius, w);
+    blurfilter(xsize, (ysize / ntasks) + 1, recvbuff, radius, w, taskid);
 
     clock_gettime(CLOCK_REALTIME, &etime);
 
     for (i = 0; i < ntasks; i++) {
-        sendcnts[i] = buffsize;
-        displs[i] = i * buffsize;
+        sendcnts[i] = buffsize + 2 * radius * xsize;
+        displs[i] = max(0, i * buffsize - 2 * radius * xsize);
     }
+    displs[ntasks] = ntasks * buffsize;
 
-    MPI_Gatherv(recvbuff, buffsize, pixel_mpi, 
+    MPI_Gatherv(recvbuff + radius * xsize, buffsize + radius * xsize, pixel_mpi, 
                 src, sendcnts, displs, 
                 pixel_mpi, ROOT, MPI_COMM_WORLD);
 
 /*    MPI_Gather(recvbuff, buffsize, pixel_mpi,
                src, buffsize, pixel_mpi,
                ROOT, MPI_COMM_WORLD);*/
+
+    MPI_Finalize();
 
     printf("Filtering took: %g secs\n", (etime.tv_sec  - stime.tv_sec) +
 	   1e-9*(etime.tv_nsec  - stime.tv_nsec)) ;
@@ -126,14 +129,9 @@ int main (int argc, char ** argv) {
     if (taskid == ROOT) {
         printf("Writing output file\n");
 
-        
-    
         if(write_ppm (argv[3], xsize, ysize, (char *)src) != 0)
           exit(1);
     }
-
-    MPI_Finalize();
-
 
     return(0);
 }
