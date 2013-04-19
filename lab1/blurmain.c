@@ -7,6 +7,9 @@
 #include "gaussw.h"
 #include "mpi.h"
 
+#define min( a, b ) ( ((a) < (b)) ? (a) : (b) )
+#define max( a, b ) ( ((a) > (b)) ? (a) : (b) )
+
 #define ROOT 0
 #define MAX_RAD 1000
 
@@ -84,12 +87,13 @@ int main (int argc, char ** argv) {
     int sendcnts[ntasks], displs[ntasks];
     int i;
     for (i = 0; i < ntasks; i++) {
-        sendcnts[i] = buffsize;
-        displs[i] = i * buffsize;
+        printf("disp: %i, sendcnts: %i, buffsize: %i, taskid: %i\n", i*buffsize-radius*xsize, buffsize + radius*xsize, buffsize, taskid);
+        sendcnts[i] = buffsize + radius * xsize;
+        displs[i] = max(0, i * buffsize - radius * xsize);
     }
 
     MPI_Scatterv(src, sendcnts, displs, 
-                 pixel_mpi, recvbuff, buffsize,
+                 pixel_mpi, recvbuff, buffsize + radius * xsize,
                  pixel_mpi, ROOT, MPI_COMM_WORLD);
 
 /*    MPI_Scatter(src, buffsize, pixel_mpi, 
@@ -101,6 +105,11 @@ int main (int argc, char ** argv) {
     blurfilter(xsize, (ysize / ntasks) + 1, recvbuff, radius, w);
 
     clock_gettime(CLOCK_REALTIME, &etime);
+
+    for (i = 0; i < ntasks; i++) {
+        sendcnts[i] = buffsize;
+        displs[i] = i * buffsize;
+    }
 
     MPI_Gatherv(recvbuff, buffsize, pixel_mpi, 
                 src, sendcnts, displs, 

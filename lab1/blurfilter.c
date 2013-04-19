@@ -8,6 +8,9 @@
 #include "blurfilter.h"
 #include "ppmio.h"
 
+#define min( a, b ) ( ((a) < (b)) ? (a) : (b) )
+#define max( a, b ) ( ((a) > (b)) ? (a) : (b) )
+
 
 pixel* pix(pixel* image, const int xx, const int yy, const int xsize)
 {
@@ -28,7 +31,7 @@ void blurfilter(const int xsize, const int endY, pixel* src, const int radius, c
 
     //printf("StartY: %i, endY: %i, taskid: %i, r: %i, g: %i, b: %i\n", startY, endY, taskid, pix(src, 20, 20, xsize)->r, pix(src, 20, 20, xsize)->g, pix(src, 20, 20, xsize)->b);
     
-    for (y = 0; y < endY; y++) {
+    for (y = radius; y < endY; y++) {
         for (x = 0; x < xsize; x++) {
             r = w[0] * pix(src, x, y, xsize)->r;
             g = w[0] * pix(src, x, y, xsize)->g;
@@ -57,7 +60,7 @@ void blurfilter(const int xsize, const int endY, pixel* src, const int radius, c
         }
     }
 
-    for (y = 0; y < endY; y++) {
+    for (y = radius; y < endY; y++) {
         for (x = 0; x < xsize; x++) {
             r = w[0] * pix(dst, x, y, xsize)->r;
             g = w[0] * pix(dst, x, y, xsize)->g;
