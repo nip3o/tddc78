@@ -77,7 +77,7 @@ int main (int argc, char ** argv) {
         threshold_level += (uint)src[i].r + (uint)src[i].g + (uint)src[i].b;
       }
 
-      threshold_level /= (xsize * ysize);
+      threshold_level /= buffsize;
     }
 
     MPI_Bcast(&threshold_level, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
