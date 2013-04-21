@@ -1,0 +1,76 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+\documentclass[a4paper]{article}
+\usepackage[swedish]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools}
+\usepackage[pdftex]{graphicx}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{geometry}
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+
+%%% HEADERS & FOOTERS
+
+\author{Jonathan Karlsson - jonka293 - 890201-1991 \and Niclas Olofsson - nicol271 - 900904-5338}
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{1pt} % customise the layout...
+\fancyhead[LO,LE]{Laboration 1 - TDDC78}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+\setlength{\parindent}{0pt}
+
+%%%% SECTION TITLE APPEARANCE
+
+%\usepackage{sectsty}
+%\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+%% (This matches ConTeXt defaults)
+%
+%%%% ToC (table of contents) APPEARANCE
+%\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+%\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+%\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+%\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+
+%%% END Article customizations
+
+%%% The "real" document content comes below...
+
+\title{Laboration 1 - TDDC78}
+
+%\date{} % Activate to display a given date or no date (if empty),
+% otherwise the current date is printed
+
+\begin{document}
+
+\maketitle
+
+\section{Program description}
+\subsection{Threshold filter}
+
+This program calculates the average intensity of the image and makes all
+pixels with a higher-than-average value white, and all other pixels
+black.\\
+
+The whole image is read on the root node. The root node also calculates
+the  average intensity of the image. The calcuated intensity is sent to
+all other nodes via MPI broadcast.\\
+
+The image data array is split in as many parts as there are nodes, and
+each node gets its own part via MPI scatter. Since each node needs to
+know  the data length to recieive, this is done in two steps where the
+data length is  sent via MPI broadcast, and then sent with MPI scatter.
+Each node then runs the threshold filter on its own part of the image.
+MPI gather then reassembles the resulting image, which is written to
+disk by the root node.\\
+
+\subsection{Blur filter}
+
+\section{Execution times}
+
+
+\end{document}

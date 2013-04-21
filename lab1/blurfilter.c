@@ -2,7 +2,7 @@
   File: blurfilter.c
 
   Implementation of blurfilter function.
-    
+
  */
 #include <stdio.h>
 #include "blurfilter.h"
@@ -30,8 +30,8 @@ void blurfilter(const int xsize, const int endY, pixel* src, const int radius, c
   pixel dst[MAX_PIXELS];
 
     //printf("StartY: %i, endY: %i, taskid: %i, r: %i, g: %i, b: %i\n", startY, endY, taskid, pix(src, 20, 20, xsize)->r, pix(src, 20, 20, xsize)->g, pix(src, 20, 20, xsize)->b);
-    
-    for (y = radius; y < endY; y++) {
+
+    for (y = radius*xsize; y < endY; y++) {
         for (x = 0; x < xsize; x++) {
             r = w[0] * pix(src, x, y, xsize)->r;
             g = w[0] * pix(src, x, y, xsize)->g;
@@ -90,7 +90,7 @@ void blurfilter(const int xsize, const int endY, pixel* src, const int radius, c
     }
 
     //printf("StartY: %i, endY: %i, taskid: %i, r: %i, g: %i, b: %i\n", startY, endY, taskid, pix(src, 20, 20, xsize)->r, pix(src, 20, 20, xsize)->g, pix(src, 20, 20, xsize)->b);
-    
+
 }
 
 
