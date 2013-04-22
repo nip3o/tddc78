@@ -28,7 +28,7 @@ int main (int argc, char ** argv) {
     MPI_Address( &item.r, &disp[0] );
     MPI_Address( &item.g, &disp[1] );
     MPI_Address( &item.b, &disp[2] );
- 
+
     disp[0] -= start;
     disp[1] -= start;
     disp[2] -= start;
@@ -37,7 +37,7 @@ int main (int argc, char ** argv) {
     MPI_Type_commit(&pixel_mpi);
 
     int buffsize;
-    
+
     /* Take care of the arguments */
     if (taskid == ROOT) {
         if (argc != 3) {
@@ -56,18 +56,16 @@ int main (int argc, char ** argv) {
 
         buffsize = xsize * ysize / ntasks + 1;
     }
-    
+
     MPI_Bcast(&buffsize, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
 
     pixel recvbuff[MAX_PIXELS];
 
-    MPI_Scatter(src, buffsize, pixel_mpi, 
+    MPI_Scatter(src, buffsize, pixel_mpi,
                 recvbuff, buffsize, pixel_mpi,
                 ROOT, MPI_COMM_WORLD);
 
     printf("Has read the image, calling filter\n");
-
-    clock_gettime(CLOCK_REALTIME, &stime);
 
     int i;
     unsigned int threshold_level;
@@ -76,15 +74,15 @@ int main (int argc, char ** argv) {
       for(i = 0, threshold_level = 0; i < buffsize; i++) {
         threshold_level += (uint)src[i].r + (uint)src[i].g + (uint)src[i].b;
       }
-
       threshold_level /= buffsize;
+
+      clock_gettime(CLOCK_REALTIME, &stime);
     }
 
     MPI_Bcast(&threshold_level, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
 
     thresfilter(buffsize, recvbuff, threshold_level);
 
-    clock_gettime(CLOCK_REALTIME, &etime);
 
     printf("buffsize: %i, xsize: %i, ysize: %i, ntasks: %i\n", buffsize, xsize, ysize, ntasks);
 
@@ -93,15 +91,17 @@ int main (int argc, char ** argv) {
                ROOT, MPI_COMM_WORLD);
 
     if (taskid == ROOT) {
+        clock_gettime(CLOCK_REALTIME, &etime);
+
         printf("Filtering took: %g secs\n", (etime.tv_sec  - stime.tv_sec) +
     	   1e-9*(etime.tv_nsec  - stime.tv_nsec)) ;
 
         /* write result */
         printf("Writing output file\n");
-        
+
         if(write_ppm (argv[2], xsize, ysize, (char *)recvbuff) != 0)
           exit(1);
-    } 
+    }
 
 
     MPI_Finalize();
