@@ -88,12 +88,12 @@ int main (int argc, char ** argv) {
     int i;
     for (i = 0; i < ntasks; i++) {
         //printf("disp: %i, sendcnts: %i, buffsize: %i, taskid: %i\n", i*buffsize-radius*xsize, buffsize + radius*xsize, buffsize, taskid);
-        sendcnts[i] = buffsize + 4 * radius * xsize;
-        displs[i] = max(0, i * buffsize - 2 * radius * xsize);
+        sendcnts[i] = buffsize + 2 * radius * xsize;
+        displs[i] = max(0, i * buffsize);
     }
 
     MPI_Scatterv(src, sendcnts, displs, 
-                 pixel_mpi, recvbuff, buffsize + 4 * radius * xsize,
+                 pixel_mpi, recvbuff, buffsize + 2 * radius * xsize,
                  pixel_mpi, ROOT, MPI_COMM_WORLD);
 
 /*    MPI_Scatter(src, buffsize, pixel_mpi, 
@@ -108,7 +108,7 @@ int main (int argc, char ** argv) {
 
     for (i = 0; i < ntasks; i++) {
         sendcnts[i] = buffsize;
-        displs[i] = max(0, i * buffsize - 2 * radius * xsize);
+        displs[i] = max(0, i * buffsize);
     }
     displs[ntasks] = ntasks * buffsize;
     displs[0] = 0;
@@ -130,7 +130,7 @@ int main (int argc, char ** argv) {
     if (taskid == ROOT) {
         printf("Writing output file\n");
 
-        if(write_ppm (argv[3], xsize, ysize, (char *)src) != 0)
+        if(write_ppm (argv[3], xsize, ysize-radius, (char *)src) != 0)
           exit(1);
     }
 
