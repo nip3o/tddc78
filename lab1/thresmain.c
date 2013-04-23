@@ -64,6 +64,7 @@ int main (int argc, char ** argv) {
         threshold_level /= buffsize;
 
         clock_gettime(CLOCK_REALTIME, &tstime);
+        clock_gettime(CLOCK_REALTIME, &stime);
     }
 
     MPI_Bcast(&buffsize, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
@@ -78,7 +79,7 @@ int main (int argc, char ** argv) {
 
     if (taskid == ROOT) {
         clock_gettime(CLOCK_REALTIME, &etime);
-        printf("Broadcast took: %g secs\n", (etime.tv_sec  - stime.tv_sec) +
+        printf("Data shuffeling took: %g secs\n", (etime.tv_sec  - stime.tv_sec) +
            1e-9*(etime.tv_nsec  - stime.tv_nsec));
     }
 
