@@ -81,10 +81,25 @@ int main (int argc, char ** argv) {
 
     MPI_Bcast(&threshold_level, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
 
+    if (taskid == ROOT) {
+        clock_gettime(CLOCK_REALTIME, &etime);
+        printf("Broadcast took: %g secs\n", (etime.tv_sec  - stime.tv_sec) +
+           1e-9*(etime.tv_nsec  - stime.tv_nsec));
+    }
+
+    clock_gettime(CLOCK_REALTIME, &stime);
+
     thresfilter(buffsize, recvbuff, threshold_level);
 
+    clock_gettime(CLOCK_REALTIME, &etime);
+    printf("Filtering took: %g secs\n", (etime.tv_sec  - stime.tv_sec) +
+        1e-9*(etime.tv_nsec  - stime.tv_nsec));
 
     printf("buffsize: %i, xsize: %i, ysize: %i, ntasks: %i\n", buffsize, xsize, ysize, ntasks);
+
+    if (taskid == ROOT) {
+        clock_gettime(CLOCK_REALTIME, &stime);
+    }
 
     MPI_Gather(recvbuff, buffsize, pixel_mpi,
                recvbuff, buffsize, pixel_mpi,
@@ -92,9 +107,8 @@ int main (int argc, char ** argv) {
 
     if (taskid == ROOT) {
         clock_gettime(CLOCK_REALTIME, &etime);
-
-        printf("Filtering took: %g secs\n", (etime.tv_sec  - stime.tv_sec) +
-    	   1e-9*(etime.tv_nsec  - stime.tv_nsec)) ;
+        printf("Gather took: %g secs\n", (etime.tv_sec  - stime.tv_sec) +
+           1e-9*(etime.tv_nsec  - stime.tv_nsec)) ;
 
         /* write result */
         printf("Writing output file\n");
