@@ -102,17 +102,18 @@ int main (int argc, char ** argv) {
 
     clock_gettime(CLOCK_REALTIME, &stime);
 
-    blurfilter(xsize, (ysize / ntasks) + 1, recvbuff, radius, w, taskid);
+    blurfilter(xsize, (ysize / ntasks) + 2 * radius, recvbuff, radius, w, taskid);
 
     clock_gettime(CLOCK_REALTIME, &etime);
 
     for (i = 0; i < ntasks; i++) {
-        sendcnts[i] = buffsize + 2 * radius * xsize;
+        sendcnts[i] = buffsize;
         displs[i] = max(0, i * buffsize - 2 * radius * xsize);
     }
     displs[ntasks] = ntasks * buffsize;
+    displs[0] = 0;
 
-    MPI_Gatherv(recvbuff + radius * xsize, buffsize + radius * xsize, pixel_mpi, 
+    MPI_Gatherv(recvbuff + radius * xsize, buffsize, pixel_mpi, 
                 src, sendcnts, displs, 
                 pixel_mpi, ROOT, MPI_COMM_WORLD);
 
