@@ -80,7 +80,7 @@ int main (int argc, char ** argv) {
     MPI_Bcast(&xsize, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
     MPI_Bcast(&ysize, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
 
-    buffsize = xsize * ysize / ntasks + 1;
+    buffsize = ceil(ysize / ntasks) * xsize;
 
     pixel recvbuff[MAX_PIXELS];
 
@@ -89,7 +89,7 @@ int main (int argc, char ** argv) {
     for (i = 0; i < ntasks; i++) {
         //printf("disp: %i, sendcnts: %i, buffsize: %i, taskid: %i\n", i*buffsize-radius*xsize, buffsize + radius*xsize, buffsize, taskid);
         sendcnts[i] = buffsize + 2 * radius * xsize;
-        displs[i] = max(0, i * buffsize);
+        displs[i] = max(0, i * buffsize); // + 0 * radius * xsize);
     }
 
     MPI_Scatterv(src, sendcnts, displs, 
@@ -108,14 +108,14 @@ int main (int argc, char ** argv) {
 
     for (i = 0; i < ntasks; i++) {
         sendcnts[i] = buffsize;
-        displs[i] = max(0, i * buffsize);
+        displs[i] = max(0, i * buffsize); // + 0 * radius * xsize);
     }
-    displs[ntasks] = ntasks * buffsize;
-    displs[0] = 0;
 
+    
     MPI_Gatherv(recvbuff + radius * xsize, buffsize, pixel_mpi, 
-                src, sendcnts, displs, 
-                pixel_mpi, ROOT, MPI_COMM_WORLD);
+            src, sendcnts, displs, 
+            pixel_mpi, ROOT, MPI_COMM_WORLD);
+
 
 /*    MPI_Gather(recvbuff, buffsize, pixel_mpi,
                src, buffsize, pixel_mpi,
@@ -130,7 +130,7 @@ int main (int argc, char ** argv) {
     if (taskid == ROOT) {
         printf("Writing output file\n");
 
-        if(write_ppm (argv[3], xsize, ysize-radius, (char *)src) != 0)
+        if(write_ppm (argv[3], xsize, ysize, (char *)src) != 0)
           exit(1);
     }
 

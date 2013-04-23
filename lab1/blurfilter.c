@@ -2,7 +2,7 @@
   File: blurfilter.c
 
   Implementation of blurfilter function.
-
+    
  */
 #include <stdio.h>
 #include "blurfilter.h"
@@ -29,9 +29,9 @@ void blurfilter(const int xsize, const int endY, pixel* src, const int radius, c
   double r,g,b,n, wc;
   pixel dst[MAX_PIXELS];
 
-    //printf("StartY: %i, endY: %i, taskid: %i, r: %i, g: %i, b: %i\n", startY, endY, taskid, pix(src, 20, 20, xsize)->r, pix(src, 20, 20, xsize)->g, pix(src, 20, 20, xsize)->b);
-
-    for (y = radius*xsize; y < endY; y++) {
+    //printf("xsize: %i, taskid: %i\n", xsize, taskid);
+    
+    for (y = 0; y < endY; y++) {
         for (x = 0; x < xsize; x++) {
             r = w[0] * pix(src, x, y, xsize)->r;
             g = w[0] * pix(src, x, y, xsize)->g;
@@ -60,7 +60,7 @@ void blurfilter(const int xsize, const int endY, pixel* src, const int radius, c
         }
     }
 
-    for (y = 0; y < endY + 2 * radius; y++) {
+    for (y = 0; y < endY; y++) {
         for (x = 0; x < xsize; x++) {
             r = w[0] * pix(dst, x, y, xsize)->r;
             g = w[0] * pix(dst, x, y, xsize)->g;
@@ -90,7 +90,7 @@ void blurfilter(const int xsize, const int endY, pixel* src, const int radius, c
     }
 
     //printf("StartY: %i, endY: %i, taskid: %i, r: %i, g: %i, b: %i\n", startY, endY, taskid, pix(src, 20, 20, xsize)->r, pix(src, 20, 20, xsize)->g, pix(src, 20, 20, xsize)->b);
-
+    
 }
 
 
