@@ -17,6 +17,7 @@ int main (int argc, char ** argv) {
 
     pixel src[MAX_PIXELS];
     struct timespec stime, etime;
+    struct timespec tstime, tetime;
 
     pixel item;
     MPI_Datatype pixel_mpi;
@@ -36,7 +37,7 @@ int main (int argc, char ** argv) {
     MPI_Type_struct(3, blocklen, disp, type, &pixel_mpi);
     MPI_Type_commit(&pixel_mpi);
 
-    int buffsize;
+    unsigned int buffsize, threshold_level;
 
     /* Take care of the arguments */
     if (taskid == ROOT) {
@@ -55,6 +56,14 @@ int main (int argc, char ** argv) {
         }
 
         buffsize = xsize * ysize / ntasks + 1;
+
+        int i;
+        for(i = 0, threshold_level = 0; i < buffsize; i++) {
+            threshold_level += (uint)src[i].r + (uint)src[i].g + (uint)src[i].b;
+        }
+        threshold_level /= buffsize;
+
+        clock_gettime(CLOCK_REALTIME, &tstime);
     }
 
     MPI_Bcast(&buffsize, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
@@ -64,20 +73,6 @@ int main (int argc, char ** argv) {
     MPI_Scatter(src, buffsize, pixel_mpi,
                 recvbuff, buffsize, pixel_mpi,
                 ROOT, MPI_COMM_WORLD);
-
-    printf("Has read the image, calling filter\n");
-
-    int i;
-    unsigned int threshold_level;
-    if (taskid == ROOT) {
-
-      for(i = 0, threshold_level = 0; i < buffsize; i++) {
-        threshold_level += (uint)src[i].r + (uint)src[i].g + (uint)src[i].b;
-      }
-      threshold_level /= buffsize;
-
-      clock_gettime(CLOCK_REALTIME, &stime);
-    }
 
     MPI_Bcast(&threshold_level, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
 
@@ -92,10 +87,10 @@ int main (int argc, char ** argv) {
     thresfilter(buffsize, recvbuff, threshold_level);
 
     clock_gettime(CLOCK_REALTIME, &etime);
-    printf("Filtering took: %g secs\n", (etime.tv_sec  - stime.tv_sec) +
+    printf("Filtering at %i took: %g secs\n", taskid, (etime.tv_sec  - stime.tv_sec) +
         1e-9*(etime.tv_nsec  - stime.tv_nsec));
 
-    printf("buffsize: %i, xsize: %i, ysize: %i, ntasks: %i\n", buffsize, xsize, ysize, ntasks);
+//    printf("buffsize: %i, xsize: %i, ysize: %i, ntasks: %i\n", buffsize, xsize, ysize, ntasks);
 
     if (taskid == ROOT) {
         clock_gettime(CLOCK_REALTIME, &stime);
@@ -109,6 +104,10 @@ int main (int argc, char ** argv) {
         clock_gettime(CLOCK_REALTIME, &etime);
         printf("Gather took: %g secs\n", (etime.tv_sec  - stime.tv_sec) +
            1e-9*(etime.tv_nsec  - stime.tv_nsec)) ;
+
+        clock_gettime(CLOCK_REALTIME, &tetime);
+        printf("Everything took: %g secs\n", (tetime.tv_sec  - tstime.tv_sec) +
+           1e-9*(tetime.tv_nsec  - tstime.tv_nsec));
 
         /* write result */
         printf("Writing output file\n");
