@@ -84,7 +84,7 @@ int main (int argc, char ** argv) {
 
     pixel recvbuff[MAX_PIXELS];
 
-    int sendcnts[ntasks], displs[ntasks], result_write_starts[ntasks];
+    int sendcnts[ntasks], displs[ntasks], result_write_starts[ntasks], recievecounts[ntasks];
     int i;
     for (i = 0; i < ntasks; i++) {
         //printf("disp: %i, sendcnts: %i, buffsize: %i, taskid: %i\n", i*buffsize-radius*xsize, buffsize + radius*xsize, buffsize, taskid);
@@ -106,19 +106,27 @@ int main (int argc, char ** argv) {
 
     clock_gettime(CLOCK_REALTIME, &etime);
 
+    int sendcount = buffsize + xsize * radius;
     for (i = 0; i < ntasks; i++) {
-        sendcnts[i] = buffsize + 2 * xsize * radius;
+        recievecounts[i] = sendcount;
         result_write_starts[i] = max(0, i * (buffsize + xsize * radius));
     }
+result_write_starts[2] -= xsize * radius;
+
+result_write_starts[3] -= 2 * xsize * radius;
+//result_write_starts[0] = buffsize;
 
     char fname[15];
     sprintf(fname, "%d.ppm", taskid);
     write_ppm (fname, xsize, ysize, (char *)recvbuff);
 
-    pixel* result_read_start = recvbuff + taskid * xsize * radius;
-
-    MPI_Gatherv(result_read_start, buffsize + xsize * radius, pixel_mpi,
-            src, sendcnts, result_write_starts,
+    pixel* result_read_start = recvbuff + xsize * radius;
+    
+if(taskid==ROOT) {
+result_read_start = recvbuff;
+}
+    MPI_Gatherv(result_read_start, sendcount, pixel_mpi,
+            src, recievecounts, result_write_starts,
             pixel_mpi, ROOT, MPI_COMM_WORLD);
 
 
