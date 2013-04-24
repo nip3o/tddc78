@@ -109,12 +109,10 @@ int main (int argc, char ** argv) {
     int sendcount = buffsize + xsize * radius;
     for (i = 0; i < ntasks; i++) {
         recievecounts[i] = sendcount;
-        result_write_starts[i] = max(0, i * (buffsize + xsize * radius));
+	
+        result_write_starts[i] = i * buffsize + xsize * radius;
     }
-result_write_starts[2] -= xsize * radius;
-
-result_write_starts[3] -= 2 * xsize * radius;
-//result_write_starts[0] = buffsize;
+result_write_starts[0] = 0;
 
     char fname[15];
     sprintf(fname, "%d.ppm", taskid);
