@@ -84,7 +84,7 @@ int main (int argc, char ** argv) {
 
     pixel recvbuff[MAX_PIXELS];
 
-    int sendcnts[ntasks], displs[ntasks];
+    int sendcnts[ntasks], displs[ntasks], result_write_starts[ntasks];
     int i;
     for (i = 0; i < ntasks; i++) {
         //printf("disp: %i, sendcnts: %i, buffsize: %i, taskid: %i\n", i*buffsize-radius*xsize, buffsize + radius*xsize, buffsize, taskid);
@@ -108,17 +108,17 @@ int main (int argc, char ** argv) {
 
     for (i = 0; i < ntasks; i++) {
         sendcnts[i] = buffsize + 2 * xsize * radius;
-        displs[i] = max(0, i * (buffsize + xsize * radius)); // + 0 * radius * xsize);
+        result_write_starts[i] = max(0, i * (buffsize + xsize * radius));
     }
 
     char fname[15];
     sprintf(fname, "%d.ppm", taskid);
     write_ppm (fname, xsize, ysize, (char *)recvbuff);
 
-    pixel* meep = recvbuff + taskid * xsize * radius;
+    pixel* result_read_start = recvbuff + taskid * xsize * radius;
 
-    MPI_Gatherv(meep, buffsize + xsize * radius, pixel_mpi,
-            src, sendcnts, displs,
+    MPI_Gatherv(result_read_start, buffsize + xsize * radius, pixel_mpi,
+            src, sendcnts, result_write_starts,
             pixel_mpi, ROOT, MPI_COMM_WORLD);
 
 
