@@ -37,7 +37,7 @@ int main (int argc, char ** argv) {
     MPI_Address( &item.r, &disp[0] );
     MPI_Address( &item.g, &disp[1] );
     MPI_Address( &item.b, &disp[2] );
- 
+
     disp[0] -= start;
     disp[1] -= start;
     disp[2] -= start;
@@ -75,7 +75,7 @@ int main (int argc, char ** argv) {
     }
 
     printf("Calling filter\n");
-    
+
     MPI_Bcast(w, MAX_RAD, MPI_DOUBLE, ROOT, MPI_COMM_WORLD);
     MPI_Bcast(&xsize, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
     MPI_Bcast(&ysize, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
@@ -92,11 +92,11 @@ int main (int argc, char ** argv) {
         displs[i] = max(0, i * buffsize); // + 0 * radius * xsize);
     }
 
-    MPI_Scatterv(src, sendcnts, displs, 
+    MPI_Scatterv(src, sendcnts, displs,
                  pixel_mpi, recvbuff, buffsize + 2 * radius * xsize,
                  pixel_mpi, ROOT, MPI_COMM_WORLD);
 
-/*    MPI_Scatter(src, buffsize, pixel_mpi, 
+/*    MPI_Scatter(src, buffsize, pixel_mpi,
                 recvbuff, buffsize, pixel_mpi,
                 ROOT, MPI_COMM_WORLD);*/
 
@@ -107,13 +107,18 @@ int main (int argc, char ** argv) {
     clock_gettime(CLOCK_REALTIME, &etime);
 
     for (i = 0; i < ntasks; i++) {
-        sendcnts[i] = buffsize;
-        displs[i] = max(0, i * buffsize); // + 0 * radius * xsize);
+        sendcnts[i] = buffsize + 2 * xsize * radius;
+        displs[i] = max(0, i * (buffsize + xsize * radius)); // + 0 * radius * xsize);
     }
 
-    
-    MPI_Gatherv(recvbuff + radius * xsize, buffsize, pixel_mpi, 
-            src, sendcnts, displs, 
+    char fname[15];
+    sprintf(fname, "%d.ppm", taskid);
+    write_ppm (fname, xsize, ysize, (char *)recvbuff);
+
+    pixel* meep = recvbuff + taskid * xsize * radius;
+
+    MPI_Gatherv(meep, buffsize + xsize * radius, pixel_mpi,
+            src, sendcnts, displs,
             pixel_mpi, ROOT, MPI_COMM_WORLD);
 
 
