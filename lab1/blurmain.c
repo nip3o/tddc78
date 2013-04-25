@@ -96,47 +96,38 @@ int main (int argc, char ** argv) {
                  pixel_mpi, recvbuff, buffsize + 2 * radius * xsize,
                  pixel_mpi, ROOT, MPI_COMM_WORLD);
 
-/*    MPI_Scatter(src, buffsize, pixel_mpi,
-                recvbuff, buffsize, pixel_mpi,
-                ROOT, MPI_COMM_WORLD);*/
-
     clock_gettime(CLOCK_REALTIME, &stime);
 
     blurfilter(xsize, (ysize / ntasks) + 2 * radius, recvbuff, radius, w, taskid);
 
     clock_gettime(CLOCK_REALTIME, &etime);
 
-    int sendcount = buffsize;
     for (i = 0; i < ntasks; i++) {
-        recievecounts[i] = sendcount;
-        recievecounts[ntasks-1] = sendcount + xsize * radius;
-        recievecounts[0] = sendcount + xsize * radius;
-	
+        recievecounts[i] = buffsize;
         result_write_starts[i] = i * buffsize + xsize * radius;
     }
 
-if(taskid == ntasks-1 || taskid == ROOT) {
-sendcount = buffsize + xsize * radius;
-}
-result_write_starts[0] = 0;
+    recievecounts[0] = buffsize + xsize * radius;
+    recievecounts[ntasks-1] = buffsize + xsize * radius;
+
+    result_write_starts[0] = 0;
 
     char fname[15];
     sprintf(fname, "%d.ppm", taskid);
     write_ppm (fname, xsize, ysize, (char *)recvbuff);
 
-    pixel* result_read_start = recvbuff + xsize * radius;
-    
-if(taskid==ROOT) {
-result_read_start = recvbuff;
-}
+    pixel* result_read_start;
+
+    if(taskid==ROOT) {
+        result_read_start = recvbuff;
+    } else {
+        result_read_start = recvbuff + xsize * radius;
+    }
+
+    int sendcount = recievecounts[taskid];
     MPI_Gatherv(result_read_start, sendcount, pixel_mpi,
-            src, recievecounts, result_write_starts,
-            pixel_mpi, ROOT, MPI_COMM_WORLD);
-
-
-/*    MPI_Gather(recvbuff, buffsize, pixel_mpi,
-               src, buffsize, pixel_mpi,
-               ROOT, MPI_COMM_WORLD);*/
+                src, recievecounts, result_write_starts,
+                pixel_mpi, ROOT, MPI_COMM_WORLD);
 
     MPI_Finalize();
 
