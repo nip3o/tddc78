@@ -10,7 +10,7 @@ if [ $1 = 0 ] ; then
 elif [ $1 = 1 ] ; then
   icc -Nmpi -o thresc thresmain.c ppmio.c thresfilter.c
   if [ $? = 0 ] ; then
-    mpirun -np 4 ./thresc images/im1.ppm images/thresh.ppm
+    mpirun -np 2 ./thresc images/im1.ppm images/thresh.ppm
   fi 
 elif [ $1 = 2 ] ; then
   icc -Nmpi -o blurc blurmain.c ppmio.c blurfilter.c gaussw.c

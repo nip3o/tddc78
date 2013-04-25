@@ -106,12 +106,18 @@ int main (int argc, char ** argv) {
 
     clock_gettime(CLOCK_REALTIME, &etime);
 
-    int sendcount = buffsize + xsize * radius;
+    int sendcount = buffsize;
     for (i = 0; i < ntasks; i++) {
         recievecounts[i] = sendcount;
+        recievecounts[ntasks-1] = sendcount + xsize * radius;
+        recievecounts[0] = sendcount + xsize * radius;
 	
         result_write_starts[i] = i * buffsize + xsize * radius;
     }
+
+if(taskid == ntasks-1 || taskid == ROOT) {
+sendcount = buffsize + xsize * radius;
+}
 result_write_starts[0] = 0;
 
     char fname[15];
