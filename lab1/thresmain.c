@@ -55,13 +55,13 @@ int main (int argc, char ** argv) {
         	exit(1);
         }
 
-        buffsize = xsize * ysize / ntasks + 1;
+        buffsize = ceil(ysize / ntasks) * xsize;
 
         int i;
         for(i = 0, threshold_level = 0; i < buffsize; i++) {
             threshold_level += (uint)src[i].r + (uint)src[i].g + (uint)src[i].b;
         }
-        threshold_level /= buffsize;
+        threshold_level /= (xsize * ysize);
 
         clock_gettime(CLOCK_REALTIME, &tstime);
         clock_gettime(CLOCK_REALTIME, &stime);
