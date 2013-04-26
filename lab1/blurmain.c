@@ -21,12 +21,13 @@ int main (int argc, char ** argv) {
     double w[MAX_RAD];
 
     struct timespec stime, etime;
-
+    struct timespec tstime, tetime;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
     MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
 
+    // Create a custom MPI datatype for pixel
     pixel item;
     MPI_Datatype pixel_mpi;
     MPI_Datatype type[3] = { MPI_UNSIGNED_CHAR, MPI_UNSIGNED_CHAR, MPI_UNSIGNED_CHAR };
@@ -48,7 +49,6 @@ int main (int argc, char ** argv) {
     int buffsize, radius, startY, endY;
 
     /* Take care of the arguments */
-
     if (argc != 4) {
         fprintf(stderr, "Usage: %s radius infile outfile\n", argv[0]);
         exit(1);
@@ -74,66 +74,80 @@ int main (int argc, char ** argv) {
         get_gauss_weights(radius, w);
     }
 
-    printf("Calling filter\n");
-
+    // Broadcast the gaussian weight vector
     MPI_Bcast(w, MAX_RAD, MPI_DOUBLE, ROOT, MPI_COMM_WORLD);
+    // Broadcast image dimensions
     MPI_Bcast(&xsize, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
     MPI_Bcast(&ysize, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
 
-    buffsize = xsize * ceil((float)ysize / (float)ntasks);
+    // Calculate chunk size
+    buffsize = ceil((float)ysize / (float)ntasks) * xsize;
     pixel recvbuff[MAX_PIXELS];
 
     int sendcnts[ntasks], displs[ntasks], result_write_starts[ntasks], recievecounts[ntasks];
     int i;
+    // Generate sendcount and displacement vectors for Scatterv
     for (i = 0; i < ntasks; i++) {
-        //printf("disp: %i, sendcnts: %i, buffsize: %i, taskid: %i\n", i*buffsize-radius*xsize, buffsize + radius*xsize, buffsize, taskid);
+        // Send enought neighbors to make it possible to also calculate
+        // blur in the edges of the chunk
         sendcnts[i] = buffsize + 2 * radius * xsize;
-        displs[i] = max(0, i * buffsize); // + 0 * radius * xsize);
+        displs[i] = max(0, i * buffsize);
     }
 
+    clock_gettime(CLOCK_REALTIME, &tstime);
+
+    // Send the image in chunks to all nodes
     MPI_Scatterv(src, sendcnts, displs,
                  pixel_mpi, recvbuff, buffsize + 2 * radius * xsize,
                  pixel_mpi, ROOT, MPI_COMM_WORLD);
 
     clock_gettime(CLOCK_REALTIME, &stime);
 
+    // Run the filter on the recieved chunk
     blurfilter(xsize, (ysize / ntasks) + 2 * radius, recvbuff, radius, w, taskid);
 
     clock_gettime(CLOCK_REALTIME, &etime);
+    printf("Filtering at %i took: %g secs\n", taskid, (etime.tv_sec  - stime.tv_sec) +
+        1e-9*(etime.tv_nsec  - stime.tv_nsec));
 
+    // Generate sendcount and displacement vectors for Scatterv
     for (i = 0; i < ntasks; i++) {
-        recievecounts[i] = buffsize;
         result_write_starts[i] = i * buffsize + xsize * radius;
+        // Only send as much of the chunk that is really useful data
+        recievecounts[i] = buffsize;
     }
 
-    recievecounts[0] = buffsize + xsize * radius;
-    recievecounts[ntasks-1] = buffsize + xsize * radius;
-
+    // Start writing from the beginning of the buffer if root
     result_write_starts[0] = 0;
 
-    char fname[15];
-    sprintf(fname, "%d.ppm", taskid);
-    write_ppm (fname, xsize, ysize, (char *)recvbuff);
+    // Since the root node has no overlap in the beginning, we need to
+    // send a little bit more from that node than from the rest.
+    recievecounts[0] = buffsize + xsize * radius;
 
     pixel* result_read_start;
     if(taskid==ROOT) {
+        // Root-node has no duplicated data in the beginning
         result_read_start = recvbuff;
     } else {
+        // Jump over the duplicated data in the beginning of each chunk
         result_read_start = recvbuff + xsize * radius;
     }
 
-    int sendcount = recievecounts[taskid];
-    MPI_Gatherv(result_read_start, sendcount, pixel_mpi,
+    MPI_Gatherv(result_read_start, recievecounts[taskid], pixel_mpi,
                 src, recievecounts, result_write_starts,
                 pixel_mpi, ROOT, MPI_COMM_WORLD);
 
+    clock_gettime(CLOCK_REALTIME, &tetime);
+
     MPI_Finalize();
 
-    printf("Filtering took: %g secs\n", (etime.tv_sec  - stime.tv_sec) +
-	   1e-9*(etime.tv_nsec  - stime.tv_nsec)) ;
 
     /* write result */
     if (taskid == ROOT) {
+        printf("Everything took: %g secs\n", (tetime.tv_sec  - tstime.tv_sec) +
+           1e-9*(tetime.tv_nsec  - tstime.tv_nsec));
+
+
         printf("Writing output file\n");
 
         if(write_ppm (argv[3], xsize, ysize, (char *)src) != 0)

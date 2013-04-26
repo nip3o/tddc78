@@ -19,6 +19,7 @@ int main (int argc, char ** argv) {
     struct timespec stime, etime;
     struct timespec tstime, tetime;
 
+    // Create a custom MPI datatype for pixel
     pixel item;
     MPI_Datatype pixel_mpi;
     MPI_Datatype type[3] = { MPI_UNSIGNED_CHAR, MPI_UNSIGNED_CHAR, MPI_UNSIGNED_CHAR };
@@ -55,26 +56,37 @@ int main (int argc, char ** argv) {
         	exit(1);
         }
 
-        buffsize = ceil(ysize / ntasks) * xsize;
+        /* Calculate chunk size for nodes. Every node gets a little bit "too much"
+           data if the image size is not dividable by the number of processes */
+        buffsize = ceil((float)ysize / (float)ntasks) * xsize;
 
+        clock_gettime(CLOCK_REALTIME, &stime);
+        // Calculate medium value of all pixels in the image
         int i;
         for(i = 0, threshold_level = 0; i < buffsize; i++) {
             threshold_level += (uint)src[i].r + (uint)src[i].g + (uint)src[i].b;
         }
         threshold_level /= (xsize * ysize);
 
+        clock_gettime(CLOCK_REALTIME, &etime);
+        printf("Threshold level calculation took: %g secs\n", taskid, (etime.tv_sec  - stime.tv_sec) +
+                1e-9*(etime.tv_nsec  - stime.tv_nsec));
+
         clock_gettime(CLOCK_REALTIME, &tstime);
         clock_gettime(CLOCK_REALTIME, &stime);
     }
 
+    // Broadcast chunk size to alla nodes
     MPI_Bcast(&buffsize, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
 
     pixel recvbuff[MAX_PIXELS];
 
+    // Send the image in chunks to all nodes
     MPI_Scatter(src, buffsize, pixel_mpi,
                 recvbuff, buffsize, pixel_mpi,
                 ROOT, MPI_COMM_WORLD);
 
+    // Broadcast threshold level
     MPI_Bcast(&threshold_level, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
 
     if (taskid == ROOT) {
@@ -85,18 +97,18 @@ int main (int argc, char ** argv) {
 
     clock_gettime(CLOCK_REALTIME, &stime);
 
+    // Run the filter on the recieved chunk
     thresfilter(buffsize, recvbuff, threshold_level);
 
     clock_gettime(CLOCK_REALTIME, &etime);
     printf("Filtering at %i took: %g secs\n", taskid, (etime.tv_sec  - stime.tv_sec) +
         1e-9*(etime.tv_nsec  - stime.tv_nsec));
 
-//    printf("buffsize: %i, xsize: %i, ysize: %i, ntasks: %i\n", buffsize, xsize, ysize, ntasks);
-
     if (taskid == ROOT) {
         clock_gettime(CLOCK_REALTIME, &stime);
     }
 
+    // Collect the data from the nodes
     MPI_Gather(recvbuff, buffsize, pixel_mpi,
                recvbuff, buffsize, pixel_mpi,
                ROOT, MPI_COMM_WORLD);
