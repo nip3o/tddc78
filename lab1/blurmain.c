@@ -80,8 +80,7 @@ int main (int argc, char ** argv) {
     MPI_Bcast(&xsize, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
     MPI_Bcast(&ysize, 1, MPI_INT, ROOT, MPI_COMM_WORLD);
 
-    buffsize = ceil(ysize / ntasks) * xsize;
-
+    buffsize = xsize * ceil((float)ysize / (float)ntasks);
     pixel recvbuff[MAX_PIXELS];
 
     int sendcnts[ntasks], displs[ntasks], result_write_starts[ntasks], recievecounts[ntasks];
@@ -117,7 +116,6 @@ int main (int argc, char ** argv) {
     write_ppm (fname, xsize, ysize, (char *)recvbuff);
 
     pixel* result_read_start;
-
     if(taskid==ROOT) {
         result_read_start = recvbuff;
     } else {
