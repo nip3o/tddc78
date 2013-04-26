@@ -8,7 +8,7 @@
 #include "ppmio.h"
 #include "thresfilter.h"
 
-#define NUM_THREADS 4
+#define NUM_THREADS 2
 
 
 struct thread_data {
@@ -16,7 +16,7 @@ struct thread_data {
    int start;
    int end;
    int threshold_level;
-   pixel chunk[];
+   pixel *chunk;
 };
 
 void *haaard_workwork(void *targs)
@@ -27,9 +27,15 @@ void *haaard_workwork(void *targs)
  //   pixel *src = malloc(sizeof(pixel) * MAX_PIXELS);
  //   memcpy( &data->chunk, &src, sizeof(pixel) * MAX_PIXELS);
 
-    printf("Starting filtering on %ld with start %i, end %i...\n", data->thread_id, data->start, data->end);
 
-    //thresfilter(data->start, data->end, src, data->threshold_level);
+    printf("Starting filtering on %ld with start %i, end %i, threshold_level: %i...\n", data->thread_id, data->start, data->end, data->threshold_level);
+
+    thresfilter(data->start, data->end, data->chunk, data->threshold_level);
+
+    char s[25];
+    sprintf(s, "images/%d.ppm", data->thread_id);
+    if(write_ppm (s, 676, 763, (char *)data->chunk) != 0)
+      exit(1);
 
     pthread_exit(NULL);
 }
@@ -45,8 +51,8 @@ int main (int argc, char ** argv) {
     /* Take care of the arguments */
 
     if (argc != 3) {
-    fprintf(stderr, "Usage: %s infile outfile\n", argv[0]);
-    exit(1);
+        fprintf(stderr, "Usage: %s infile outfile\n", argv[0]);
+        exit(1);
     }
 
     /* read file */
@@ -73,17 +79,16 @@ int main (int argc, char ** argv) {
 //    int chunksize = ceil(MAX_PIXELS / NUM_THREADS);
 
     int t, rc;
-    for(t = 0; t < NUM_THREADS; t++){
+    for(t = 0; t < NUM_THREADS; t++) {
         data[t].thread_id = t;
 
-        data[t].start = t * ceil(ysize / NUM_THREADS);
-        data[t].end = (t + 1) * ceil(ysize / NUM_THREADS);
+        data[t].start = t * ceil(ysize / NUM_THREADS) * xsize;
+        data[t].end = (t + 1) * ceil(ysize / NUM_THREADS) * xsize;
 
         data[t].threshold_level = threshold_level;
+        data[t].chunk = src;
 
-        memcpy( &data[t].chunk, &src, sizeof(pixel) * MAX_PIXELS);
-
-        printf("Creating thread...\n");
+        printf("Creating thread...%i\n", t);
 
         rc = pthread_create(&threads[t], NULL, haaard_workwork, (void *) &data[t]);
 

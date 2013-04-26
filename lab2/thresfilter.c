@@ -1,4 +1,5 @@
 #include "thresfilter.h"
+#include <stdio.h>
 
 void thresfilter(const int start, const int end, pixel* src, const unsigned int threshold_level){
 #define uint unsigned int
