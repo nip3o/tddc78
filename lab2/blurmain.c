@@ -94,8 +94,16 @@ int main (int argc, char ** argv) {
 
         data[t].xsize = xsize;
 
-        data[t].startY = t * ceil(ysize / NUM_THREADS) + radius;
-        data[t].endY = (t + 1) * ceil(ysize / NUM_THREADS) - radius;
+        if(t == 0) {
+            data[t].startY = 0;
+        } else {
+            data[t].startY = t * ceil(ysize / NUM_THREADS) + radius;
+        }
+        if(t == NUM_THREADS - 1) {
+            data[t].endY = ysize;
+        } else {
+            data[t].endY = (t + 1) * ceil(ysize / NUM_THREADS) - radius;
+        }
 
         data[t].radius = radius;
         data[t].w = w;
