@@ -13,6 +13,8 @@ typedef struct _pixel {
     unsigned char r,g,b;
 } pixel;
 
-void blurfilter(const int xsize, const int startY, const int endY, pixel* src, const int radius, const double *w);
+void blurfilter(const int xsize, const int startY, const int endY, pixel* src,
+    const int radius, const double *w, const int thread_id,
+    sem_t* unsafe_zone_read, pthread_mutex_t* zone_lock);
 
 #endif

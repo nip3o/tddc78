@@ -6,6 +6,11 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <assert.h>
+#include <stdbool.h>
+
 #include "blurfilter.h"
 #include "ppmio.h"
 
@@ -25,9 +30,12 @@ pixel* pix(pixel* image, const int xx, const int yy, const int xsize)
   return (image + off);
 }
 
-void blurfilter(const int xsize, const int startY, const int endY, pixel* src, const int radius, const double *w){
+void blurfilter(const int xsize, const int startY, const int endY, pixel* src,
+                const int radius, const double *w, const int thread_id,
+                sem_t* unsafe_zone_read, pthread_mutex_t* zone_lock) {
     int x,y,x2,y2, wi;
     double r,g,b,n, wc;
+    bool unlocked = false;
 
     pixel* dst = (pixel*)malloc(MAX_PIXELS * sizeof(pixel));
     if(!src) {
@@ -64,6 +72,11 @@ void blurfilter(const int xsize, const int startY, const int endY, pixel* src, c
         }
     }
 
+    if (thread_id == 1) {
+        sem_post(unsafe_zone_read);
+        printf("Unsafe zone is read\n");
+    }
+
     for (y = startY; y < endY; y++) {
         for (x = 0; x < xsize; x++) {
             r = w[0] * pix(dst, x, y, xsize)->r;
@@ -87,6 +100,16 @@ void blurfilter(const int xsize, const int startY, const int endY, pixel* src, c
                     n += wc;
                 }
             }
+
+            // Inside unsafe zone and not already unlocked, and on unsafe zone write thread
+            if (!unlocked && thread_id == 0) {
+                sem_wait(unsafe_zone_read);
+                unlocked = true;
+
+                if(x == 0)
+                    printf("Doing write operations...\n");
+            }
+
             pix(src,x,y, xsize)->r = r/n;
             pix(src,x,y, xsize)->g = g/n;
             pix(src,x,y, xsize)->b = b/n;
