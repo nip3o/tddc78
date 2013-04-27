@@ -23,12 +23,9 @@ void *haaard_workwork(void *targs)
 {
     struct thread_data *data = (struct thread_data *) targs;
 
-    printf("Starting filtering on %ld with start %i, end %i, threshold_level: %i...\n", data->thread_id, data->start, data->end, data->threshold_level);
+    printf("Starting filtering on %d with start %i, end %i, threshold_level: %i...\n", data->thread_id, data->start, data->end, data->threshold_level);
 
     thresfilter(data->start, data->end, data->image, data->threshold_level);
-
-    char s[25];
-    sprintf(s, "images/%d.ppm", data->thread_id);
 
     pthread_exit(NULL);
 }
@@ -78,7 +75,7 @@ int main (int argc, char ** argv) {
 
         printf("Creating thread...%i\n", t);
 
-//        clock_gettime(CLOCK_REALTIME, &stime);
+        clock_gettime(CLOCK_REALTIME, &stime);
 
         rc = pthread_create(&threads[t], NULL, haaard_workwork, (void *) &data[t]);
 
@@ -92,9 +89,9 @@ int main (int argc, char ** argv) {
         pthread_join(threads[t], NULL);
     }
 
-//    clock_gettime(CLOCK_REALTIME, &etime);
-//    printf("Filtering took: %g secs\n", (etime.tv_sec  - stime.tv_sec) +
-//       1e-9*(etime.tv_nsec  - stime.tv_nsec)) ;
+    clock_gettime(CLOCK_REALTIME, &etime);
+    printf("Filtering took: %g secs\n", (etime.tv_sec  - stime.tv_sec) +
+	       1e-9*(etime.tv_nsec  - stime.tv_nsec)) ;
 
     /* write result */
     printf("Writing output file\n");
