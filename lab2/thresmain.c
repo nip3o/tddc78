@@ -34,9 +34,14 @@ int main (int argc, char ** argv) {
     pthread_t threads[NUM_THREADS];
 
     int xsize, ysize, colmax;
-    pixel src[MAX_PIXELS];
     struct timespec stime, etime;
     unsigned int threshold_level;
+
+    pixel* src = (pixel*)malloc(MAX_PIXELS * sizeof(pixel));
+    if(!src) {
+        printf("Could not mallocate memory\n");
+        exit(1);
+    }
 
     /* Take care of the arguments */
 
@@ -99,6 +104,6 @@ int main (int argc, char ** argv) {
     if(write_ppm (argv[2], xsize, ysize, (char *)src) != 0)
       exit(1);
 
-
+    free(src);
     return(0);
 }
