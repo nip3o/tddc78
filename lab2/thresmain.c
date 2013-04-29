@@ -73,14 +73,17 @@ int main (int argc, char ** argv) {
         data[t].thread_id = t;
 
         data[t].start = t * ceil(ysize / NUM_THREADS) * xsize;
-        data[t].end = (t + 1) * ceil(ysize / NUM_THREADS) * xsize;
+        if (t + 1 == NUM_THREADS)
+            data[t].end = ysize * xsize;
+        else
+            data[t].end = (t + 1) * ceil(ysize / NUM_THREADS) * xsize;
 
         data[t].threshold_level = threshold_level;
         data[t].image = src;
 
         printf("Creating thread...%i\n", t);
 
-        clock_gettime(CLOCK_REALTIME, &stime);
+       // clock_gettime(CLOCK_REALTIME, &stime);
 
         rc = pthread_create(&threads[t], NULL, haaard_workwork, (void *) &data[t]);
 
@@ -94,7 +97,7 @@ int main (int argc, char ** argv) {
         pthread_join(threads[t], NULL);
     }
 
-    clock_gettime(CLOCK_REALTIME, &etime);
+   // clock_gettime(CLOCK_REALTIME, &etime);
     printf("Filtering took: %g secs\n", (etime.tv_sec  - stime.tv_sec) +
 	       1e-9*(etime.tv_nsec  - stime.tv_nsec)) ;
 

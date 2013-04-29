@@ -15,7 +15,6 @@
 
 #define NUM_THREADS 2
 
-
 #define ROOT 0
 #define MAX_RAD 1000
 
@@ -24,6 +23,7 @@ struct thread_data {
     int thread_id;
 
     int xsize;
+    int ysize;
     int startY;
     int endY;
     int radius;
@@ -42,7 +42,7 @@ void *unsynced_blur(void *targs)
     printf("Starting filtering on %d with startY %i, endY %i\n", data->thread_id, data->startY, data->endY);
     blurfilter(data->xsize, data->startY, data->endY, data->image, data->radius,
                data->w, data->thread_id,
-               data->semaphore, data->zone_lock);
+               data->semaphore, data->zone_lock, data->ysize);
 
     pthread_exit(NULL);
 }
@@ -108,6 +108,7 @@ int main (int argc, char ** argv) {
         data[t].thread_id = t;
 
         data[t].xsize = xsize;
+        data[t].ysize = ysize;
 
         if(t == 0) {
             data[t].startY = 0;
