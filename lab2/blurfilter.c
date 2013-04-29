@@ -43,13 +43,20 @@ void blurfilter(const int xsize, const int startY, const int endY,
         exit(1);
     }
 
+
+    // 2 * P * (22 * R + 25) FLOPS
+
+    // ysize times
     for (y = max(0, startY - radius); y < min(ysize, endY + radius); y++) {
+        // xsize times
         for (x = 0; x < xsize; x++) {
+            // 9 FLOP
             r = w[0] * pix(src, x, y, xsize)->r;
             g = w[0] * pix(src, x, y, xsize)->g;
             b = w[0] * pix(src, x, y, xsize)->b;
             n = w[0];
             for ( wi = 1; wi <= radius; wi++) {
+                // 22 FLOP * radius
                 wc = w[wi];
                 x2 = x - wi;
                 if(x2 >= 0) {
@@ -66,13 +73,16 @@ void blurfilter(const int xsize, const int startY, const int endY,
                     n += wc;
                 }
             }
+            // 16 FLOP
             pix(dst,x,y, xsize)->r = r/n;
             pix(dst,x,y, xsize)->g = g/n;
             pix(dst,x,y, xsize)->b = b/n;
         }
     }
 
+    // ysize times
     for (y = startY; y < endY; y++) {
+        // xsize times
         for (x = 0; x < xsize; x++) {
             r = w[0] * pix(dst, x, y, xsize)->r;
             g = w[0] * pix(dst, x, y, xsize)->g;

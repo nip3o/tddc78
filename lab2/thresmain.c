@@ -60,6 +60,7 @@ int main (int argc, char ** argv) {
     }
 
     int i;
+    // 5 * P FLOPS
     for(i = 0, threshold_level = 0; i < (xsize * ysize); i++) {
         threshold_level += (int)src[i].r + (int)src[i].g + (int)src[i].b;
     }
@@ -108,5 +109,7 @@ int main (int argc, char ** argv) {
       exit(1);
 
     free(src);
+    free(out);
+
     return(0);
 }
