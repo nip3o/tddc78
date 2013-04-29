@@ -13,7 +13,7 @@
 #include "gaussw.h"
 
 
-#define NUM_THREADS 2
+#define NUM_THREADS 8
 
 #define ROOT 0
 #define MAX_RAD 1000
@@ -28,11 +28,9 @@ struct thread_data {
     int endY;
     int radius;
 
-    sem_t* semaphore;
-    pthread_mutex_t* zone_lock;
-
     double *w;
     pixel *image;
+    pixel *output;
 };
 
 void *unsynced_blur(void *targs)
@@ -40,9 +38,10 @@ void *unsynced_blur(void *targs)
     struct thread_data *data = (struct thread_data *) targs;
 
     printf("Starting filtering on %d with startY %i, endY %i\n", data->thread_id, data->startY, data->endY);
-    blurfilter(data->xsize, data->startY, data->endY, data->image, data->radius,
-               data->w, data->thread_id,
-               data->semaphore, data->zone_lock, data->ysize);
+
+    blurfilter(data->xsize, data->startY, data->endY,
+               data->image, data->output,
+               data->radius, data->w, data->thread_id, data->ysize);
 
     pthread_exit(NULL);
 }
@@ -56,7 +55,8 @@ int main (int argc, char ** argv) {
     double w[MAX_RAD];
 
     pixel* src = (pixel*)malloc(MAX_PIXELS * sizeof(pixel));
-    if(!src) {
+    pixel* out = (pixel*)malloc(MAX_PIXELS * sizeof(pixel));
+    if(!src || !out) {
         printf("Could not mallocate memory\n");
         exit(1);
     }
@@ -98,12 +98,6 @@ int main (int argc, char ** argv) {
     pthread_t threads[NUM_THREADS];
     int t, rc;
 
-    pthread_mutex_t zone_lock;
-    pthread_mutex_init( &zone_lock, NULL);
-
-    sem_t semaphore;
-    sem_init(&semaphore, 0, 0);
-
     for(t = 0; t < NUM_THREADS; t++) {
         data[t].thread_id = t;
 
@@ -124,9 +118,7 @@ int main (int argc, char ** argv) {
         data[t].radius = radius;
         data[t].w = w;
         data[t].image = src;
-
-        data[t].zone_lock = &zone_lock;
-        data[t].semaphore = &semaphore;
+        data[t].output = out;
 
         printf("Creating thread...%i\n", t);
 //        clock_gettime(CLOCK_REALTIME, &stime);
@@ -139,8 +131,6 @@ int main (int argc, char ** argv) {
         pthread_join(threads[t], NULL);
     }
 
-//    blurfilter(xsize, 226, 286, src, radius, w);
-
 
 //    clock_gettime(CLOCK_REALTIME, &etime);
 
@@ -150,7 +140,7 @@ int main (int argc, char ** argv) {
     /* write result */
     printf("Writing output file\n");
 
-    if(write_ppm (argv[3], xsize, ysize, (char *)src) != 0)
+    if(write_ppm (argv[3], xsize, ysize, (char *)out) != 0)
       exit(1);
 
 
