@@ -48,6 +48,8 @@ program laplsolv
      tmp1 = T(1:n, 0)
      error = 0.0D0
 
+!tip from filip: lägg till en ny do-loop innuti 'do j = 1, n' och parallellisera arbetet i den inuti kolumnerna... isch
+
 !New(i,j) = f ( Old(i-1,j), Old(i,j-1), Old(i,j+1), Old(i+1,j))
 !while (...) do
 !for all tasks i,j do in parallel
