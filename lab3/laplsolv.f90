@@ -5,15 +5,15 @@ program laplsolv
 ! Written by Fredrik Berntsson (frber@math.liu.se) March 2003
 ! Modified by Berkant Savas (besav@math.liu.se) April 2006
 !-----------------------------------------------------------------------
-  integer, parameter                  :: n = 100, maxiter = 100
+  integer, parameter                  :: n = 100, maxiter = 10
   double precision, parameter          :: tol = 1.0E-3
   double precision, dimension(0:n+1, 0:n+1) :: T
   double precision, dimension(n)       :: tmp1, tmp2, tmp3
   double precision                    :: error,x
   real                                :: t1,t0
-  integer                             :: i, j, k
+  integer                             :: i, j, k, last_row
   character(len = 20)                   :: str
-  integer omp_get_num_threads, omp_get_thread_num, intval
+  integer :: omp_get_num_threads, omp_get_thread_num
 
   ! Set boundary conditions and initial values for the unknowns
   T = 0.0D0
@@ -21,37 +21,39 @@ program laplsolv
   T(0:n+1 , n+1)   = 1.0D0
   T(n+1   , 0:n+1) = 2.0D0
 
+
   ! Solve the linear system of equations using the Jacobi method
   call cpu_time(t0)
 
   do k = 1, maxiter
 
-    error = 0.0D0
-    
-    !$omp parallel private(tmp1, tmp2, tmp3, intval)
-    !tmp1 = T(1:n, 0)
-    intval = n / omp_get_num_threads()
-    tmp1 = T(1:n, omp_get_thread_num() * intval)
-    !$omp barrier
-    do j = omp_get_thread_num() * intval, (omp_get_thread_num()+1) * intval
-      print *, j
-      tmp2 = T(1:n, j)
-      tmp3 = T(1:n, j+1)
-      T(1:n, j) = ( T(0:n-1, j) + T(2:n+1, j) + tmp3 + tmp1) / 4.0D0
+!     error = 0.0D0
 
-      !$omp critical
-        error = max(error, maxval(abs(tmp2 - T(1:n, j))))
-      !$omp end critical
+    !$omp parallel private(j, tmp3, last_row) shared(T)
+    last_row = (omp_get_thread_num() + 1) * (n / omp_get_num_threads())
+    print * , "last row is", last_row
+    tmp1 = T(1:n, max(0, omp_get_thread_num() * (n / omp_get_num_threads()) - 1))
+    tmp3 = T(1:n, last_row)
 
-      tmp1 = tmp2
-      !$omp barrier
-    end do
-    !$omp end parallel
+     !$omp do
+     do j = 1, n
+        tmp2 = T(1:n, j)
 
-    if (error < tol) then
-     exit
-    end if
+        if (j == last_row) then
+            T(1:n, j) = ( T(0:n-1, j) + T(2:n+1, j) + tmp3 + tmp1) / 4.0D0
+        else
+            T(1:n, j) = ( T(0:n-1, j) + T(2:n+1, j) + T(1:n, j+1) + tmp1) / 4.0D0
+        end if
+!        error = max(error, maxval(abs(tmp2 - T(1:n, j))))
+        tmp1 = tmp2
 
+     end do
+     !$omp end do
+     !$omp end parallel
+
+!     if (error < tol) then
+!        exit
+!     end if
   end do
 
   call cpu_time(t1)
