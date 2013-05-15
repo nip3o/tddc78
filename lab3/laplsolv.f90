@@ -5,7 +5,7 @@ program laplsolv
 ! Written by Fredrik Berntsson (frber@math.liu.se) March 2003
 ! Modified by Berkant Savas (besav@math.liu.se) April 2006
 !-----------------------------------------------------------------------
-  integer, parameter                  :: n = 100, maxiter = 100
+  integer, parameter                  :: n = 1000, maxiter = 1000
   double precision, parameter          :: tol = 1.0E-3
   double precision, dimension(0:n+1, 0:n+1) :: T
   double precision, dimension(n)       :: tmp1, tmp2, tmp3
@@ -26,11 +26,11 @@ program laplsolv
   call cpu_time(t0)
 
   do k = 1, maxiter
-!     error = 0.0D0
+     error = 0.0D0
 
-    !$omp parallel private(j, tmp3, last_row) shared(T)
+    !$omp parallel private(j, tmp3, last_row) shared(T) reduction (max:error)
     last_row = (omp_get_thread_num() + 1) * (n / omp_get_num_threads())
-    print * , "last row is", last_row
+
     tmp1 = T(1:n, max(0, omp_get_thread_num() * (n / omp_get_num_threads()) - 1))
     tmp3 = T(1:n, last_row)
 
@@ -43,16 +43,19 @@ program laplsolv
         else
             T(1:n, j) = ( T(0:n-1, j) + T(2:n+1, j) + T(1:n, j+1) + tmp1) / 4.0D0
         end if
-!        error = max(error, maxval(abs(tmp2 - T(1:n, j))))
+        !$omp critical
+        error = max(error, maxval(abs(tmp2 - T(1:n, j))))
+        !$omp end critical
         tmp1 = tmp2
 
      end do
      !$omp end do
      !$omp end parallel
 
-!     if (error < tol) then
-!        exit
-!     end if
+     if (error < tol) then
+        exit
+     end if
+
   end do
 
   call cpu_time(t1)
