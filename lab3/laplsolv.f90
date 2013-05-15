@@ -13,8 +13,7 @@ program laplsolv
   real                                :: t1,t0
   integer                             :: i, j, k
   character(len = 20)                   :: str
-
-  integer :: nthreads, rank, start, end, interval, omp_get_num_threads, omp_get_thread_num
+  integer omp_get_num_threads, omp_get_thread_num, intval
 
   ! Set boundary conditions and initial values for the unknowns
   T = 0.0D0
@@ -25,60 +24,35 @@ program laplsolv
   ! Solve the linear system of equations using the Jacobi method
   call cpu_time(t0)
 
-  !$omp parallel private(nthreads, rank, start, end, interval, tmp1, tmp2, tmp3, error, j, k)
+  do k = 1, maxiter
 
+    error = 0.0D0
+    
+    !$omp parallel private(tmp1, tmp2, tmp3, intval)
+    !tmp1 = T(1:n, 0)
+    intval = n / omp_get_num_threads()
+    tmp1 = T(1:n, omp_get_thread_num() * intval)
+    !$omp barrier
+    do j = omp_get_thread_num() * intval, (omp_get_thread_num()+1) * intval
+      print *, j
+      tmp2 = T(1:n, j)
+      tmp3 = T(1:n, j+1)
+      T(1:n, j) = ( T(0:n-1, j) + T(2:n+1, j) + tmp3 + tmp1) / 4.0D0
 
-  rank = omp_get_thread_num()
-  nthreads = omp_get_num_threads()
-  interval = maxiter / nthreads
-  start = rank * interval 
-  end = (rank + 1) * interval
-  
-  if (rank .eq. 0) then
-    start = 1
-  end if
-
-  print *, 'start: ', start, ', end: ', end, ', from: ', rank
-
-  ! Solve the linear system of equations using the Jacobi method
-  call cpu_time(t0)
-
-  do k = start, end
-
-     tmp1 = T(1:n, 0)
-     error = 0.0D0
-
-!tip from filip: lägg till en ny do-loop innuti 'do j = 1, n' och parallellisera arbetet i den inuti kolumnerna... isch
-
-!New(i,j) = f ( Old(i-1,j), Old(i,j-1), Old(i,j+1), Old(i+1,j))
-!while (...) do
-!for all tasks i,j do in parallel
-  !send Old(i,j) to each neighbor
-  !receive Old(i-1,j), Old(i,j-1), Old(i,j+1), Old(i+1,j) from neighbors 
-  !compute New(i,j) f ( Old(i-1,j), Old(i,j-1), Old(i,j+1), Old(i+1,j) )
-!od
-!(then copy back Old(i,j) New(i,j) i, j to prepare for next iteration) 
-!od
-
-     do j = 1, n
-        tmp2 = T(1:n, j)
-        tmp3 = ( T(0:n-1, j) + T(2:n+1, j) + T(1:n, j+1) + tmp1) / 4.0D0
-
-        !omp critical
-          T(1:n, j) = tmp3
-        !omp end critcal
-
+      !$omp critical
         error = max(error, maxval(abs(tmp2 - T(1:n, j))))
-        tmp1 = tmp2
-     end do
+      !$omp end critical
 
-     if (error < tol) then
-        exit
-     end if
+      tmp1 = tmp2
+      !$omp barrier
+    end do
+    !$omp end parallel
+
+    if (error < tol) then
+     exit
+    end if
 
   end do
-
-  !$omp end parallel
 
   call cpu_time(t1)
 
