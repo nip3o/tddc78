@@ -5,11 +5,7 @@ program laplsolv
 ! Written by Fredrik Berntsson (frber@math.liu.se) March 2003
 ! Modified by Berkant Savas (besav@math.liu.se) April 2006
 !-----------------------------------------------------------------------
-<<<<<<< HEAD
-  integer, parameter                  :: n = 100, maxiter = 10
-=======
   integer, parameter                  :: n = 1000, maxiter = 1000
->>>>>>> ed9413660b7639863292ea3ddbc8397dc70dfeb1
   double precision, parameter          :: tol = 1.0E-3
   double precision, dimension(0:n+1, 0:n+1) :: T
   double precision, dimension(n)       :: tmp1, tmp2, tmp3
@@ -29,15 +25,11 @@ program laplsolv
   ! Solve the linear system of equations using the Jacobi method
   call cpu_time(t0)
 
+  !$omp parallel private(j, tmp3, last_row) shared(T) 
   do k = 1, maxiter
-<<<<<<< HEAD
 
-!     error = 0.0D0
-=======
-     error = 0.0D0
->>>>>>> ed9413660b7639863292ea3ddbc8397dc70dfeb1
+    !error = 0.0D0
 
-    !$omp parallel private(j, tmp3, last_row) shared(T) reduction (max:error)
     last_row = (omp_get_thread_num() + 1) * (n / omp_get_num_threads())
 
     tmp1 = T(1:n, max(0, omp_get_thread_num() * (n / omp_get_num_threads()) - 1))
@@ -48,24 +40,24 @@ program laplsolv
         tmp2 = T(1:n, j)
 
         if (j == last_row) then
-            T(1:n, j) = ( T(0:n-1, j) + T(2:n+1, j) + tmp3 + tmp1) / 4.0D0
+          T(1:n, j) = ( T(0:n-1, j) + T(2:n+1, j) + tmp3 + tmp1) / 4.0D0
         else
-            T(1:n, j) = ( T(0:n-1, j) + T(2:n+1, j) + T(1:n, j+1) + tmp1) / 4.0D0
+          T(1:n, j) = ( T(0:n-1, j) + T(2:n+1, j) + T(1:n, j+1) + tmp1) / 4.0D0
         end if
-        !$omp critical
-        error = max(error, maxval(abs(tmp2 - T(1:n, j))))
-        !$omp end critical
+        !!! $ omp critical
+        !  error = max(error, maxval(abs(tmp2 - T(1:n, j))))
+        !!! $ omp end critical
         tmp1 = tmp2
 
      end do
      !$omp end do
-     !$omp end parallel
 
-     if (error < tol) then
-        exit
-     end if
+     !if (error < tol) then
+      !  exit
+     !end if
 
   end do
+  !$omp end parallel
 
   call cpu_time(t1)
 
