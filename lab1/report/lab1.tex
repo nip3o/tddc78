@@ -63,7 +63,7 @@ all other nodes via MPI broadcast.\\
 The image data array is split in as many parts as there are nodes, and
 each node gets its own part via MPI scatter. Since each node needs to
 know  the data length to receive, this is done in two steps where the
-data length is  sent via MPI broadcast, and then sent with MPI scatter.
+data length is sent via MPI broadcast, and then sent with MPI scatter.
 Each node then runs the threshold filter on its own part of the image.
 MPI gather then reassembles the resulting image, which is written to
 disk by the root node.\\
