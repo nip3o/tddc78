@@ -8,8 +8,14 @@
 #include "definitions.h"
 
 
+void print_pcoord(pcord_t c) {
+    printf("x %.2f, y %.2f, vx %.2f, vy %.2f\n", c.x, c.y, c.vx, c.vy);
+}
+
+
 int main(int argc, char const *argv[])
 {
+    double total_momentum = 0.0;
     std::vector<particle_t> particles;
     cord_t wall;
     wall.x0 = 0;
@@ -23,18 +29,15 @@ int main(int argc, char const *argv[])
         pcord_t c;
         particle_t p;
 
-
         float r = std::rand() % MAX_INITIAL_VELOCITY;
-        float angle = std::rand() * 2;
-
-        printf("angle %.2f\n", angle);
+        float angle = std::rand() * M_PI * 2;
 
         c.x = std::rand() % (int)BOX_HORIZ_SIZE;
         c.y = std::rand() % (int)BOX_VERT_SIZE;
         c.vx = r * cos(angle);
         c.vy = r * sin(angle);
 
-        printf("x %.2f, y %.2f, vx %.2f, vy %.2f\n", c.x, c.y, c.vx, c.vy);
+//        print_pcoord(c);
 
         p.pcord = c;
         p.ptype = 0;
@@ -42,29 +45,36 @@ int main(int argc, char const *argv[])
         particles.push_back(p);
     }
 
-    printf("Created %d particles\n", particles.size());
+    printf("Created %d particles\n", (int)particles.size());
 
 
     for (int t = 0; t < MAX_TIME; ++t) {
-
+        // For each particle
         for (int i = 0; i < particles.size(); ++i) {
+            // Check if the particle collides with any other particle
             for (int j = i + 1; (j < particles.size()); ++j) {
                 float collission = collide(&particles[i].pcord,
                                            &particles[j].pcord);
 
                 if (collission >= 0) {
-                    printf("Collission! \n");
                     interact(&particles[i].pcord,
                              &particles[j].pcord, collission);
+
+                    // Collission with particle and then collission with wall.
+                    // This should be very unlikely to happen
+                    total_momentum += wall_collide(&particles[j].pcord, wall);
                 } else {
                     feuler(&particles[i].pcord, t);
                 }
-
-                wall_collide(&particles[i].pcord, wall);
-                wall_collide(&particles[j].pcord, wall);
             }
+            // Check if particle collides with a wall and and that to total momentum
+            float wall_collission = wall_collide(&particles[i].pcord, wall);
+            total_momentum += wall_collission;
         }
+
+        printf("Total momentum is %.2f\n", total_momentum);
     }
+    printf("Total pressure is %.2f\n", total_momentum / (MAX_TIME * WALL_LENGTH));
 
     return 0;
 }
