@@ -3,7 +3,12 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
-//#include <mpi.h>
+
+// #define _MPI
+
+#ifdef _MPI
+#include <mpi.h>
+#endif
 
 #include "physics.h"
 #include "definitions.h"
@@ -19,9 +24,11 @@ int main(int argc, char const *argv[])
 {
     int taskid, ntasks;
 
-    // MPI_Init(&argc, &argv);
-    // MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
-    // MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+#ifdef _MPI
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
+    MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+#endif
 
     double total_momentum = 0.0;
 
@@ -82,7 +89,9 @@ int main(int argc, char const *argv[])
     }
     printf("Total pressure is %.2f\n", total_momentum / (MAX_TIME * WALL_LENGTH));
 
-    // MPI_Finalize();
+#ifdef _MPI
+    MPI_Finalize();
+#endif
 
     return 0;
 }
