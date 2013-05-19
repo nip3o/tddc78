@@ -3,10 +3,12 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
+//#include <mpi.h>
 
 #include "physics.h"
 #include "definitions.h"
 
+#define ROOT 0
 
 void print_pcoord(pcord_t c) {
     printf("x %.2f, y %.2f, vx %.2f, vy %.2f\n", c.x, c.y, c.vx, c.vy);
@@ -15,7 +17,14 @@ void print_pcoord(pcord_t c) {
 
 int main(int argc, char const *argv[])
 {
+    int taskid, ntasks;
+
+    // MPI_Init(&argc, &argv);
+    // MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
+    // MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+
     double total_momentum = 0.0;
+
     std::vector<particle_t> particles;
     cord_t wall;
     wall.x0 = 0;
@@ -64,17 +73,16 @@ int main(int argc, char const *argv[])
                     // This should be very unlikely to happen
                     total_momentum += wall_collide(&particles[j].pcord, wall);
                 } else {
-                    feuler(&particles[i].pcord, t);
+                    feuler(&particles[i].pcord, 1);
                 }
             }
             // Check if particle collides with a wall and and that to total momentum
-            float wall_collission = wall_collide(&particles[i].pcord, wall);
-            total_momentum += wall_collission;
+            total_momentum += wall_collide(&particles[i].pcord, wall);
         }
-
-        printf("Total momentum is %.2f\n", total_momentum);
     }
     printf("Total pressure is %.2f\n", total_momentum / (MAX_TIME * WALL_LENGTH));
+
+    // MPI_Finalize();
 
     return 0;
 }
