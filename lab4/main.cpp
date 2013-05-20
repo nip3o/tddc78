@@ -110,6 +110,25 @@ int main(int argc, char const *argv[]) {
 
         for (int i = 0; i < ntasks; ++i) {
             printf("Sending %d particles from %d to %d\n", (int)travellers[i].size(), taskid, i);
+
+#ifdef _MPI
+            int meep = 47;
+            // Just test to send a random integer...
+
+            MPI_Barrier(MPI_COMM_WORLD);
+            if (taskid == i) {
+                // Recieve data, in order, from everyone except ourselves
+                for (int j = 0; j < ntasks; ++j) {
+                    if (taskid != j) {
+                        MPI_Recv(&meep, 1, MPI_INT, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    }
+                }
+
+            } else {
+                // This must be done in order!
+                MPI_Send(&meep, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+            }
+#endif
             travellers[i].clear();
         }
 
