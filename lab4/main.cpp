@@ -25,6 +25,7 @@ int destination(const int area_size, pcord_t c) {
 
 int main(int argc, char const *argv[]) {
     int taskid = 0, ntasks = 2;
+    MPI_Status status;
 
 #ifdef _MPI
     MPI_Init(&argc, &argv);
@@ -108,6 +109,8 @@ int main(int argc, char const *argv[]) {
             }
         } // end particle-loop
 
+
+
         for (int i = 0; i < ntasks; ++i) {
             printf("Sending %d particles from %d to %d\n", (int)travellers[i].size(), taskid, i);
 
@@ -117,15 +120,12 @@ int main(int argc, char const *argv[]) {
 
             MPI_Barrier(MPI_COMM_WORLD);
             if (taskid == i) {
-                // Recieve data, in order, from everyone except ourselves
-                for (int j = 0; j < ntasks; ++j) {
-                    if (taskid != j) {
-                        MPI_Recv(&meep, 1, MPI_INT, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    }
+                // Recieve data from everyone except ourselves
+                for (int j = 0; j < ntasks - 1; ++j) {
+                    MPI_Recv(&meep, 1, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 }
-
             } else {
-                // This must be done in order!
+                // Send the data to node i
                 MPI_Send(&meep, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
             }
 #endif
