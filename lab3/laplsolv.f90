@@ -5,15 +5,15 @@ program laplsolv
 ! Written by Fredrik Berntsson (frber@math.liu.se) March 2003
 ! Modified by Berkant Savas (besav@math.liu.se) April 2006
 !-----------------------------------------------------------------------
-  integer, parameter                  :: n = 100, maxiter = 1000
+  use omp_lib
+  integer, parameter                  :: n = 1000, maxiter = 100
   double precision, parameter          :: tol = 1.0E-3
   double precision, dimension(0:n+1, 0:n+1) :: T
   double precision, dimension(n)       :: tmp1, tmp2, tmp3
-  double precision                    :: error,x
-  real                                :: t1,t0
+  double precision                    :: error,x,t0,t1
   integer                             :: i, j, k
   character(len = 20)                   :: str
-  integer :: omp_get_num_threads, omp_get_thread_num, iterations, exiting, last_row, first_row, interval
+  integer :: iterations, exiting, last_row, first_row, interval
 
   ! Set boundary conditions and initial values for the unknowns
   T = 0.0D0
@@ -23,7 +23,7 @@ program laplsolv
 
 
   ! Solve the linear system of equations using the Jacobi method
-  call cpu_time(t0)
+  t0 = omp_get_wtime() !call cpu_time(t0) !omp_time
   !$omp parallel private(j, k, tmp1, tmp2, tmp3, first_row, last_row, interval) shared(T, error)
   interval = n / omp_get_num_threads()
   last_row = (omp_get_thread_num() + 1) * interval
@@ -53,14 +53,13 @@ program laplsolv
     !$omp end do
 
     if (error < tol) then
-      print *, 'exit ', error, k
       exit
     end if
     !$omp barrier
   end do
   !$omp end parallel
-
-  call cpu_time(t1)
+  
+  t1 = omp_get_wtime() !call cpu_time(t1)
 
   write(unit=*, fmt=*) 'Time:', t1 - t0, 'Number of Iterations:', k
   write(unit=*, fmt=*) 'Temperature of element T(1,1)  = ', T(1, 1)
