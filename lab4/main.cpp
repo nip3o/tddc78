@@ -96,14 +96,16 @@ int main(int argc, char *argv[]) {
 
 
     for (int t = 0; t < MAX_TIME; ++t) {
+        int i = 0;
+        int particles_size = particles.size();
         // For each particle
-        for (int i = 0; i < particles.size(); ++i) {
+        while (i < particles_size) {
             collission = -1;
 
             // Check if the particle collides with any other particle
             for (int j = i + 1; (j < particles.size()); ++j) {
                 collission = collide(&particles[i].pcord,
-                                           &particles[j].pcord);
+                                     &particles[j].pcord);
 
                 if (collission >= 0) {
                     interact(&particles[i].pcord,
@@ -127,12 +129,17 @@ int main(int argc, char *argv[]) {
             if(new_destination != taskid) {
                 // Mark a new destination for the particle
                 travellers[new_destination].push_back(particles[i]);
-                // Add it to the list of particles to be deleted from this node
-                deleted.push_back(i);
+
+                particles.erase(particles.begin() + i);
+                particles_size = particles.size();
+            } else {
+                i++;
             }
         } // end particle-loop
 
 
+        pcord_t cord;
+        particle_t particle;
 
         for (int i = 0; i < ntasks; ++i) {
 #ifdef _MPI
@@ -142,11 +149,21 @@ int main(int argc, char *argv[]) {
                 for (int j = 0; j < ntasks - 1; ++j) {
                     int recieved_length;
 
+                    printf("Probing\n");
                     MPI_Probe(MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
                     MPI_Get_count(&status, pcoord_mpi_type, &recieved_length);
 
                     printf("%d Recieving %d\n", taskid, recieved_length);
-                    MPI_Recv(&recieve_buffer, recieved_length, pcoord_mpi_type, status.MPI_SOURCE, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    MPI_Recv(recieve_buffer, recieved_length, pcoord_mpi_type, status.MPI_SOURCE, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+                    printf("Preparing to add stuff, size=%d\n", (int)particles.size());
+                    for (int k = 0; k < recieved_length; ++k) {
+                        cord = recieve_buffer[k];
+                        particle.pcord = cord;
+                        particle.ptype = 0;
+                        particles.push_back(particle);
+                    }
+                    printf("Added stuff, t=%d, size=%d\n", t, (int)particles.size());
                 }
             } else {
                 printf("%d Sending %d particles to %d\n", taskid, (int)travellers[i].size(), i);
