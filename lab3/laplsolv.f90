@@ -6,12 +6,12 @@ program laplsolv
 ! Modified by Berkant Savas (besav@math.liu.se) April 2006
 !-----------------------------------------------------------------------
   use omp_lib
-  integer, parameter                  :: n = 1000, maxiter = 100
+  integer, parameter                  :: n = 1000, maxiter = 1000
   double precision, parameter          :: tol = 1.0E-3
   double precision, dimension(0:n+1, 0:n+1) :: T
   double precision, dimension(n)       :: tmp1, tmp2, tmp3
   double precision                    :: error,x,t0,t1
-  integer                             :: i, j, k
+  integer                             :: i, j, k, kEnd
   character(len = 20)                   :: str
   integer :: iterations, exiting, last_row, first_row, interval
 
@@ -53,6 +53,9 @@ program laplsolv
     !$omp end do
 
     if (error < tol) then
+      if (omp_get_thread_num() == 0) then
+        kEnd = k
+      end if
       exit
     end if
     !$omp barrier
@@ -61,7 +64,7 @@ program laplsolv
   
   t1 = omp_get_wtime() !call cpu_time(t1)
 
-  write(unit=*, fmt=*) 'Time:', t1 - t0, 'Number of Iterations:', k
+  write(unit=*, fmt=*) 'Time:', t1 - t0, 'Number of Iterations:', kEnd
   write(unit=*, fmt=*) 'Temperature of element T(1,1)  = ', T(1, 1)
 
   ! Uncomment the next part if you want to write the whole solution

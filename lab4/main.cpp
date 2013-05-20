@@ -92,8 +92,8 @@ int main(int argc, char *argv[]) {
     printf("Created %d particles\n", (int)particles.size());
     int new_destination;
     float collission;
-    pcord_t* recieve_buffer = (pcord_t *)malloc(PARTICLE_BUFFER_SIZE * sizeof(pcord_t));
-
+    pcord_t* recieve_buffer;
+    recieve_buffer = new pcord_t[PARTICLE_BUFFER_SIZE];
 
     for (int t = 0; t < MAX_TIME; ++t) {
         int i = 0;
@@ -149,24 +149,19 @@ int main(int argc, char *argv[]) {
                 for (int j = 0; j < ntasks - 1; ++j) {
                     int recieved_length;
 
-                    printf("Probing\n");
                     MPI_Probe(MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
                     MPI_Get_count(&status, pcoord_mpi_type, &recieved_length);
 
-                    printf("%d Recieving %d\n", taskid, recieved_length);
                     MPI_Recv(recieve_buffer, recieved_length, pcoord_mpi_type, status.MPI_SOURCE, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-                    printf("Preparing to add stuff, size=%d\n", (int)particles.size());
                     for (int k = 0; k < recieved_length; ++k) {
                         cord = recieve_buffer[k];
                         particle.pcord = cord;
                         particle.ptype = 0;
                         particles.push_back(particle);
                     }
-                    printf("Added stuff, t=%d, size=%d\n", t, (int)particles.size());
                 }
             } else {
-                printf("%d Sending %d particles to %d\n", taskid, (int)travellers[i].size(), i);
 
                 // Send the data to node i
                 MPI_Send(&travellers[i][0], travellers[i].size(), pcoord_mpi_type, i, 0, MPI_COMM_WORLD);
@@ -178,7 +173,9 @@ int main(int argc, char *argv[]) {
     } // end timestep-loop
     printf("Total pressure is %e\n", total_momentum / (MAX_TIME * WALL_LENGTH));
 
-//    free(recieve_buffer);
+    //free(recieve_buffer);
+    MPI_Barrier(MPI_COMM_WORLD);
+    delete[] recieve_buffer;
 
 #ifdef _MPI
     MPI_Finalize();
