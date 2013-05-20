@@ -1,14 +1,14 @@
+#define _MPI
+
+#ifdef _MPI
+#include <mpi.h>
+#endif
+
 #include <vector>
 #include <math.h>
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
-
-// #define _MPI
-
-#ifdef _MPI
-#include <mpi.h>
-#endif
 
 #include "physics.h"
 #include "definitions.h"
@@ -23,16 +23,37 @@ int destination(const int area_size, pcord_t c) {
     return (int)c.x / area_size;
 }
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char *argv[]) {
     int taskid = 0, ntasks = 2;
-    MPI_Status status;
 
 #ifdef _MPI
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
     MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+
+    MPI_Status status;
+    MPI_Datatype pcoord_mpi_type;
+    MPI_Datatype type[4] = { MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT };
+    int blocklen[] = { 1, 1, 1, 1 };
+    MPI_Aint start, disp[4];
+
+    pcord_t item;
+    MPI_Address( &item, &start );
+    MPI_Address( &item.x, &disp[0] );
+    MPI_Address( &item.y, &disp[1] );
+    MPI_Address( &item.vx, &disp[2] );
+    MPI_Address( &item.vy, &disp[3] );
+
+    disp[0] -= start;
+    disp[1] -= start;
+    disp[2] -= start;
+    disp[3] -= start;
+
+    MPI_Type_struct(4, blocklen, disp, type, &pcoord_mpi_type);
+    MPI_Type_commit(&pcoord_mpi_type);
 #endif
 
+    printf("ntasks %d, taskid %d\n", ntasks, taskid);
     const int AREA_SIZE = BOX_HORIZ_SIZE / ntasks;
     std::vector<particle_t>* travellers = new std::vector<particle_t>[ntasks];
 
@@ -71,6 +92,8 @@ int main(int argc, char const *argv[]) {
     printf("Created %d particles\n", (int)particles.size());
     int new_destination;
     float collission;
+    pcord_t* recieve_buffer = (pcord_t *)malloc(PARTICLE_BUFFER_SIZE * sizeof(pcord_t));
+
 
     for (int t = 0; t < MAX_TIME; ++t) {
         // For each particle
@@ -112,32 +135,37 @@ int main(int argc, char const *argv[]) {
 
 
         for (int i = 0; i < ntasks; ++i) {
-            printf("Sending %d particles from %d to %d\n", (int)travellers[i].size(), taskid, i);
-
 #ifdef _MPI
-            int meep = 47;
-            // Just test to send a random integer...
-
             MPI_Barrier(MPI_COMM_WORLD);
             if (taskid == i) {
                 // Recieve data from everyone except ourselves
                 for (int j = 0; j < ntasks - 1; ++j) {
-                    MPI_Recv(&meep, 1, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    int recieved_length;
+
+                    MPI_Probe(MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
+                    MPI_Get_count(&status, pcoord_mpi_type, &recieved_length);
+
+                    printf("%d Recieving %d\n", taskid, recieved_length);
+                    MPI_Recv(&recieve_buffer, recieved_length, pcoord_mpi_type, status.MPI_SOURCE, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 }
             } else {
+                printf("%d Sending %d particles to %d\n", taskid, (int)travellers[i].size(), i);
+
                 // Send the data to node i
-                MPI_Send(&meep, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+                MPI_Send(&travellers[i][0], travellers[i].size(), pcoord_mpi_type, i, 0, MPI_COMM_WORLD);
             }
 #endif
             travellers[i].clear();
         }
 
-
     } // end timestep-loop
     printf("Total pressure is %e\n", total_momentum / (MAX_TIME * WALL_LENGTH));
 
+//    free(recieve_buffer);
+
 #ifdef _MPI
     MPI_Finalize();
+    printf("Finalized\n");
 #endif
 
     return 0;
