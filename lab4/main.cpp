@@ -19,12 +19,12 @@ void print_pcoord(pcord_t c) {
     printf("x %.2f, y %.2f, vx %.2f, vy %.2f\n", c.x, c.y, c.vx, c.vy);
 }
 
-int destination(int area_size, pcord_t c) {
-    return (int)c.x % (int)area_size;
+int destination(const int area_size, pcord_t c) {
+    return (int)c.x / area_size;
 }
 
 int main(int argc, char const *argv[]) {
-    int taskid = 0, ntasks = 4;
+    int taskid = 0, ntasks = 2;
 
 #ifdef _MPI
     MPI_Init(&argc, &argv);
@@ -38,6 +38,7 @@ int main(int argc, char const *argv[]) {
     double total_momentum = 0.0;
 
     std::vector<particle_t> particles;
+    std::vector<int> deleted;
     cord_t wall;
     wall.x0 = 0;
     wall.y0 = 0;
@@ -103,11 +104,18 @@ int main(int argc, char const *argv[]) {
                 // Mark a new destination for the particle
                 travellers[new_destination].push_back(particles[i]);
                 // Add it to the list of particles to be deleted from this node
-                travellers[taskid].push_back(particles[i]);
+                deleted.push_back(i);
             }
+        } // end particle-loop
+
+        for (int i = 0; i < ntasks; ++i) {
+            printf("Sending %d particles from %d to %d\n", (int)travellers[i].size(), taskid, i);
+            travellers[i].clear();
         }
-    }
-    printf("Total pressure is %.2f\n", total_momentum / (MAX_TIME * WALL_LENGTH));
+
+
+    } // end timestep-loop
+    printf("Total pressure is %e\n", total_momentum / (MAX_TIME * WALL_LENGTH));
 
 #ifdef _MPI
     MPI_Finalize();
