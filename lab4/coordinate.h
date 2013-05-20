@@ -13,6 +13,9 @@ struct part_cord {
     float y ;
     float vx ;
     float vy ;
+
+    part_cord() {}
+    part_cord(float x, float y, float vx, float vy): x(x), y(y), vx(vx), vy(vy) {}
 } ;
 
 typedef struct cord cord_t ;

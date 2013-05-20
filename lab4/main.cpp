@@ -138,38 +138,53 @@ int main(int argc, char *argv[]) {
             }
         } // end particle-loop
 
-
         pcord_t cord;
-        particle_t particle;
+
+#ifdef _MPI
+        MPI_Request req;
+
+        // Send data asynchronously to all the other nodes
+        for (int i = 0; i < ntasks; ++i) {
+            if (i != taskid) {
+                printf("%d Sending to %d\n", taskid, i);
+                // Send data to node i
+                MPI_Isend(&travellers[i][0], travellers[i].size(), pcoord_mpi_type, i, 0, MPI_COMM_WORLD, &req);
+            }
+        }
+
+        // Recieve data from all the other nodes
+        for (int j = 0; j < ntasks - 1; ++j) {
+            int recieved_length, flag = 0;
+
+            while(!flag) {
+                MPI_Iprobe(MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &flag, &status);
+            }
+            MPI_Get_count(&status, pcoord_mpi_type, &recieved_length);
+
+            printf("%d Recieved message with length %d\n", taskid, recieved_length);
+            MPI_Recv(recieve_buffer, recieved_length, pcoord_mpi_type, status.MPI_SOURCE, 0, MPI_COMM_WORLD, &status);
+            printf("%d Recieved\n", taskid);
+
+            for (int k = 0; k < recieved_length; ++k) {
+                particle_t particle;
+                pcord_t temp = recieve_buffer[k];
+                pcord_t* coord = new pcord_t(temp.x, temp.y, temp.vx, temp.vy);
+
+                particle.pcord = *coord;
+                particle.ptype = 0;
+                particles.push_back(particle);
+            }
+        }
+
+        printf("Daarn fine barrier\n");
+        MPI_Barrier(MPI_COMM_WORLD);
+        printf("Passed\n");
 
         for (int i = 0; i < ntasks; ++i) {
-#ifdef _MPI
-            MPI_Barrier(MPI_COMM_WORLD);
-            if (taskid == i) {
-                // Recieve data from everyone except ourselves
-                for (int j = 0; j < ntasks - 1; ++j) {
-                    int recieved_length;
-
-                    MPI_Probe(MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
-                    MPI_Get_count(&status, pcoord_mpi_type, &recieved_length);
-
-                    MPI_Recv(recieve_buffer, recieved_length, pcoord_mpi_type, status.MPI_SOURCE, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-                    for (int k = 0; k < recieved_length; ++k) {
-                        cord = recieve_buffer[k];
-                        particle.pcord = cord;
-                        particle.ptype = 0;
-                        particles.push_back(particle);
-                    }
-                }
-            } else {
-
-                // Send the data to node i
-                MPI_Send(&travellers[i][0], travellers[i].size(), pcoord_mpi_type, i, 0, MPI_COMM_WORLD);
-            }
-#endif
             travellers[i].clear();
+            printf("%d Cleared\n", taskid);
         }
+#endif
 
     } // end timestep-loop
 
