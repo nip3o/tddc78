@@ -57,10 +57,9 @@ int main(int argc, char *argv[]) {
     const int AREA_SIZE = BOX_HORIZ_SIZE / ntasks;
     std::vector<particle_t>* travellers = new std::vector<particle_t>[ntasks];
 
-    double total_momentum = 0.0;
+    double total_momentum, local_total_momentum = 0.0;
 
     std::vector<particle_t> particles;
-    std::vector<int> deleted;
     cord_t wall;
     wall.x0 = 0;
     wall.y0 = 0;
@@ -114,7 +113,7 @@ int main(int argc, char *argv[]) {
                              &particles[j].pcord, collission);
 
                     // Collission with particle and then collission with wall
-                    total_momentum += wall_collide(&particles[j].pcord, wall);
+                    local_total_momentum += wall_collide(&particles[j].pcord, wall);
                     continue;
                 }
             }
@@ -124,7 +123,7 @@ int main(int argc, char *argv[]) {
                 feuler(&particles[i].pcord, 1);
 
                 // Check if particle collides with a wall and add that to total momentum
-                total_momentum += wall_collide(&particles[i].pcord, wall);
+                local_total_momentum += wall_collide(&particles[i].pcord, wall);
             }
 
             new_destination = destination(AREA_SIZE, particles[i].pcord);
@@ -173,13 +172,17 @@ int main(int argc, char *argv[]) {
         }
 
     } // end timestep-loop
-    printf("Total pressure is %e\n", total_momentum / (MAX_TIME * WALL_LENGTH));
-
-    //free(recieve_buffer);
-    MPI_Barrier(MPI_COMM_WORLD);
-    delete[] recieve_buffer;
 
 #ifdef _MPI
+    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Reduce(&local_total_momentum, &total_momentum, ntasks, MPI_DOUBLE, MPI_SUM, ROOT, MPI_COMM_WORLD);
+
+    if (taskid == ROOT) {
+        printf("Total pressure is %e\n", total_momentum / (MAX_TIME * WALL_LENGTH));
+    }
+
+    // delete[] recieve_buffer;
+
     MPI_Finalize();
     printf("Finalized\n");
 #endif
