@@ -76,7 +76,9 @@ int main(int argc, char *argv[]) {
         float r = std::rand() % MAX_INITIAL_VELOCITY;
         float angle = std::rand() * M_PI * 2;
 
-        c.x = std::rand() % (int)BOX_HORIZ_SIZE;
+        const float LOW = AREA_SIZE * taskid;
+        const float HIGH = AREA_SIZE * (taskid + 1);
+        c.x = LOW + (float)std::rand()/((float)RAND_MAX/(HIGH - LOW));
         c.y = std::rand() % (int)BOX_VERT_SIZE;
         c.vx = r * cos(angle);
         c.vy = r * sin(angle);
@@ -92,8 +94,7 @@ int main(int argc, char *argv[]) {
     printf("Created %d particles\n", (int)particles.size());
     int new_destination;
     float collission;
-    pcord_t* recieve_buffer = (pcord_t *)malloc(PARTICLE_BUFFER_SIZE * sizeof(pcord_t));
-
+    pcord_t recieve_buffer[PARTICLE_BUFFER_SIZE];
 
     for (int t = 0; t < MAX_TIME; ++t) {
         int i = 0;
