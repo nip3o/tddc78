@@ -19,16 +19,21 @@ void print_pcoord(pcord_t c) {
     printf("x %.2f, y %.2f, vx %.2f, vy %.2f\n", c.x, c.y, c.vx, c.vy);
 }
 
+int destination(int area_size, pcord_t c) {
+    return (int)c.x % (int)area_size;
+}
 
-int main(int argc, char const *argv[])
-{
-    int taskid, ntasks;
+int main(int argc, char const *argv[]) {
+    int taskid = 0, ntasks = 4;
 
 #ifdef _MPI
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
     MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
 #endif
+
+    const int AREA_SIZE = BOX_HORIZ_SIZE / ntasks;
+    std::vector<particle_t>* travellers = new std::vector<particle_t>[ntasks];
 
     double total_momentum = 0.0;
 
@@ -62,29 +67,44 @@ int main(int argc, char const *argv[])
     }
 
     printf("Created %d particles\n", (int)particles.size());
-
+    int new_destination;
+    float collission;
 
     for (int t = 0; t < MAX_TIME; ++t) {
         // For each particle
         for (int i = 0; i < particles.size(); ++i) {
+            collission = -1;
+
             // Check if the particle collides with any other particle
             for (int j = i + 1; (j < particles.size()); ++j) {
-                float collission = collide(&particles[i].pcord,
+                collission = collide(&particles[i].pcord,
                                            &particles[j].pcord);
 
                 if (collission >= 0) {
                     interact(&particles[i].pcord,
                              &particles[j].pcord, collission);
 
-                    // Collission with particle and then collission with wall.
-                    // This should be very unlikely to happen
+                    // Collission with particle and then collission with wall
                     total_momentum += wall_collide(&particles[j].pcord, wall);
-                } else {
-                    feuler(&particles[i].pcord, 1);
+                    continue;
                 }
             }
-            // Check if particle collides with a wall and and that to total momentum
-            total_momentum += wall_collide(&particles[i].pcord, wall);
+
+            if (collission < 0) {
+                // The particle did not collide, move it
+                feuler(&particles[i].pcord, 1);
+
+                // Check if particle collides with a wall and add that to total momentum
+                total_momentum += wall_collide(&particles[i].pcord, wall);
+            }
+
+            new_destination = destination(AREA_SIZE, particles[i].pcord);
+            if(new_destination != taskid) {
+                // Mark a new destination for the particle
+                travellers[new_destination].push_back(particles[i]);
+                // Add it to the list of particles to be deleted from this node
+                travellers[taskid].push_back(particles[i]);
+            }
         }
     }
     printf("Total pressure is %.2f\n", total_momentum / (MAX_TIME * WALL_LENGTH));
