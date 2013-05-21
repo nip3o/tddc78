@@ -111,7 +111,6 @@ int main(int argc, char *argv[]) {
                 if (collission >= 0) {
                     interact(&particles[i].pcord,
                              &particles[j].pcord, collission);
-
                     // Collission with particle and then collission with wall
                     local_total_momentum += wall_collide(&particles[j].pcord, wall);
                     continue;
@@ -138,7 +137,9 @@ int main(int argc, char *argv[]) {
             }
         } // end particle-loop
 
+
         pcord_t cord;
+        particle_t particle;
 
 #ifdef _MPI
         MPI_Request req;
@@ -146,7 +147,10 @@ int main(int argc, char *argv[]) {
         // Send data asynchronously to all the other nodes
         for (int i = 0; i < ntasks; ++i) {
             if (i != taskid) {
-                printf("%d Sending to %d\n", taskid, i);
+                for (int j = 0; j < travellers[i].size(); ++j) {
+                    printf("%d Sending vx=%.2f, vy=%.2f \n", i, travellers[i][j].pcord.vx, travellers[i][j].pcord.vy);
+                }
+
                 // Send data to node i
                 MPI_Isend(&travellers[i][0], travellers[i].size(), pcoord_mpi_type, i, 0, MPI_COMM_WORLD, &req);
             }
@@ -161,28 +165,32 @@ int main(int argc, char *argv[]) {
             }
             MPI_Get_count(&status, pcoord_mpi_type, &recieved_length);
 
-            printf("%d Recieved message with length %d\n", taskid, recieved_length);
+//            printf("%d Recieved message with length %d\n", taskid, recieved_length);
             MPI_Recv(recieve_buffer, recieved_length, pcoord_mpi_type, status.MPI_SOURCE, 0, MPI_COMM_WORLD, &status);
-            printf("%d Recieved\n", taskid);
+//            printf("%d Recieved\n", taskid);
 
             for (int k = 0; k < recieved_length; ++k) {
-                particle_t particle;
-                pcord_t temp = recieve_buffer[k];
-                pcord_t* coord = new pcord_t(temp.x, temp.y, temp.vx, temp.vy);
+                pcord_t coord;
+                coord.x = recieve_buffer[k].x;
+                coord.y = recieve_buffer[k].y;
+                coord.vx = recieve_buffer[k].vx;
+                coord.vy = recieve_buffer[k].vy;
 
-                particle.pcord = *coord;
+                particle.pcord = coord;
                 particle.ptype = 0;
                 particles.push_back(particle);
+
+                printf("%d Recieving vx=%.2f, vy=%.2f \n", taskid, particle.pcord.vx, particle.pcord.vy);
             }
         }
 
-        printf("Daarn fine barrier\n");
+//        printf("Daarn fine barrier\n");
         MPI_Barrier(MPI_COMM_WORLD);
-        printf("Passed\n");
+//        printf("Passed\n");
 
         for (int i = 0; i < ntasks; ++i) {
             travellers[i].clear();
-            printf("%d Cleared\n", taskid);
+ //           printf("%d Cleared\n", taskid);
         }
 #endif
 

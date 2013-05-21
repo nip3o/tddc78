@@ -77,7 +77,7 @@ float collide(pcord_t *p1, pcord_t *p2){
 
 
 
-void interact(pcord_t *p1,pcord_t *p2, float t){
+void interact(pcord_t *p1, pcord_t *p2, float t){
     float c,s,a,b,tao;
     pcord_t p1temp,p2temp;
 
