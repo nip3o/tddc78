@@ -33,29 +33,13 @@ int main(int argc, char *argv[]) {
 
     MPI_Status status;
     MPI_Datatype pcoord_mpi_type;
-    MPI_Datatype type[4] = { MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT };
-    int blocklen[] = { 1, 1, 1, 1 };
-    MPI_Aint start, disp[4];
 
-    pcord_t item;
-    MPI_Address( &item, &start );
-    MPI_Address( &item.x, &disp[0] );
-    MPI_Address( &item.y, &disp[1] );
-    MPI_Address( &item.vx, &disp[2] );
-    MPI_Address( &item.vy, &disp[3] );
-
-    disp[0] -= start;
-    disp[1] -= start;
-    disp[2] -= start;
-    disp[3] -= start;
-
-    MPI_Type_struct(4, blocklen, disp, type, &pcoord_mpi_type);
+    MPI_Type_contiguous( 4, MPI_FLOAT, &pcoord_mpi_type );
     MPI_Type_commit(&pcoord_mpi_type);
 #endif
 
-    printf("ntasks %d, taskid %d\n", ntasks, taskid);
     const int AREA_SIZE = BOX_HORIZ_SIZE / ntasks;
-    std::vector<particle_t>* travellers = new std::vector<particle_t>[ntasks];
+    std::vector<pcord_t>* travellers = new std::vector<pcord_t>[ntasks];
 
     double total_momentum, local_total_momentum = 0.0;
 
@@ -90,7 +74,7 @@ int main(int argc, char *argv[]) {
         particles.push_back(p);
     }
 
-    printf("Created %d particles\n", (int)particles.size());
+//    printf("Created %d particles\n", (int)particles.size());
     int new_destination;
     float collission;
     pcord_t* recieve_buffer;
@@ -128,7 +112,7 @@ int main(int argc, char *argv[]) {
             new_destination = destination(AREA_SIZE, particles[i].pcord);
             if(new_destination != taskid) {
                 // Mark a new destination for the particle
-                travellers[new_destination].push_back(particles[i]);
+                travellers[new_destination].push_back(particles[i].pcord);
 
                 particles.erase(particles.begin() + i);
                 particles_size = particles.size();
@@ -147,9 +131,10 @@ int main(int argc, char *argv[]) {
         // Send data asynchronously to all the other nodes
         for (int i = 0; i < ntasks; ++i) {
             if (i != taskid) {
-                for (int j = 0; j < travellers[i].size(); ++j) {
-                    printf("%d Sending vx=%.2f, vy=%.2f \n", i, travellers[i][j].pcord.vx, travellers[i][j].pcord.vy);
-                }
+ //               for (int j = 0; j < travellers[i].size(); ++j) {
+ //                   printf("%d Sending x=%.2f, y=%.2f, vx=%.2f, vy=%.2f \n", i, travellers[i][j].x, travellers[i][j].y, travellers[i][j].vx, travellers[i][j].vy);
+ //               }
+
 
                 // Send data to node i
                 MPI_Isend(&travellers[i][0], travellers[i].size(), pcoord_mpi_type, i, 0, MPI_COMM_WORLD, &req);
@@ -166,7 +151,7 @@ int main(int argc, char *argv[]) {
             MPI_Get_count(&status, pcoord_mpi_type, &recieved_length);
 
 //            printf("%d Recieved message with length %d\n", taskid, recieved_length);
-            MPI_Recv(recieve_buffer, recieved_length, pcoord_mpi_type, status.MPI_SOURCE, 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(recieve_buffer, recieved_length, pcoord_mpi_type, status.MPI_SOURCE, 0, MPI_COMM_WORLD,  MPI_STATUS_IGNORE);
 //            printf("%d Recieved\n", taskid);
 
             for (int k = 0; k < recieved_length; ++k) {
@@ -180,7 +165,7 @@ int main(int argc, char *argv[]) {
                 particle.ptype = 0;
                 particles.push_back(particle);
 
-                printf("%d Recieving vx=%.2f, vy=%.2f \n", taskid, particle.pcord.vx, particle.pcord.vy);
+//                printf("%d Recieving x=%.2f, y=%.2f, vx=%.2f, vy=%.2f \n", taskid, particle.pcord.x, particle.pcord.y, particle.pcord.vx, particle.pcord.vy);
             }
         }
 
@@ -207,7 +192,7 @@ int main(int argc, char *argv[]) {
     // delete[] recieve_buffer;
 
     MPI_Finalize();
-    printf("Finalized\n");
+//    printf("Finalized\n");
 #endif
 
     return 0;
