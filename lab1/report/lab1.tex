@@ -58,34 +58,54 @@ black.\\
 
 The whole image is read on the root node. The root node also calculates
 the  average intensity of the image. The calculated intensity is sent to
-all other nodes via MPI broadcast.\\
+all other nodes via MPI\_Broadcast().\\
 
 The image data array is split in as many parts as there are nodes, and
-each node gets its own part via MPI scatter. Since each node needs to
-know  the data length to receive, this is done in two steps where the
-data length is sent via MPI broadcast, and then sent with MPI scatter.
-Each node then runs the threshold filter on its own part of the image.
-MPI gather then reassembles the resulting image, which is written to
-disk by the root node.\\
+each node gets its own part via MPI\_Scatter(). Since each node needs to
+know the data length to receive, this is done in two steps where the
+total data length is first sent via MPI broadcast, and then the data is
+sent with MPI scatter. Each node then runs the threshold filter on its
+own part of the image. MPI\_Gather() then reassembles the resulting image,
+which is written to disk by the root node.\\
 
 \subsection{Blur filter}
-For each pixel this program calculates the average color of the neighbors with a given radius, of the pixel and sets the pixels color to the average. This gives a blurred effect over the whole image with a small radius giving almost the same image back and a big radius gives a very blurry image.\\
 
- The whole image is read on the root node and then the intervals that each processor is going to work in is calculated and transmitted with scatterv. The reason that scatterv is necessary is because there\rq{}s a lot of dependencies between each chunk of the image so each processor need a bit more data so it can read all neighbors, otherwise there will be some broken lines in the image. Now each chunk is iterated by the blur filter and then transmitted to the root node with gatherv, the root node must take special care to get rid of some overhead created by the sending of extra data. This is done by pointing a bit forward in the array storing the image.
+For each pixel this program calculates the average color of the
+neighbors with a given radius, of the pixel and sets the pixels color to
+the average. This gives a blurred effect over the whole image with a
+small radius giving almost the same image back, and a big radius gives a
+very blurry image.\\
+
+The whole image is read at the root node. The intervals that each
+processor is going to work in is calculated. Since the algorithm is
+dependent on the value of the neighbours of each pixels, we have to send
+some more image information than we are actually blurring on each node,
+otherwise there will be some broken lines in the image. The data is
+distributed to the nodes using MPI\_Scatterv(). Now each chunk is
+iterated by the blur filter and then transmitted to the root node with
+MPI\_Gatherv(), the root node must take special care to get rid of some
+overhead created by the sending of extra data. This is done by pointing
+a bit forward in the array storing the image.
 
 \section{Execution times}
-Below are figures showing the execution times, some comments is that the thresh filter scales poorly since it\rq{}s such a small problem and the overhead of communication is too big. The blur filter scales better but we notice some overhead when we need to send to different processors to access our nodes.
+
+Below are graphs showing the execution times of our blur- and thresh
+filter implementations. We notice that the thresh filter scales poorly
+since it\rq{}s such a small problem and the overhead of communication is
+too big. The blur filter scales better, but we notice some overhead when
+we need to send to different processors to access our nodes.
+
 \begin{figure}
   \centering
   \includegraphics{sameProcessors.png}
-  \caption{Using the same amount of nodes on differente images. (Thresh)}
+  \caption{Using the same amount of nodes on different images. (Thresh)}
   \label{tab:fig1}
 \end{figure}
-  
+
 \begin{figure}
   \centering
   \includegraphics{samePixels.png}
-  \caption{Using the same image with different amount of modes. (Thresh)}
+  \caption{Using the same image with different number of nodes. (Thresh)}
   \label{tab:fig2}
 \end{figure}
 
@@ -99,14 +119,14 @@ Below are figures showing the execution times, some comments is that the thresh 
 \begin{figure}
   \centering
   \includegraphics{sameProcessorBlur.png}
-  \caption{Using the same amount of nodes on differente images. (Blur)}
+  \caption{Using the same amount of nodes on different images. (Blur)}
   \label{tab:fig4}
 \end{figure}
 
 \begin{figure}
   \centering
   \includegraphics{samePixelsBlur.png}
-  \caption{Using the same image with different amount of modes. (Blur)}
+  \caption{Using the same image with different number of nodes. (Blur)}
   \label{tab:fig5}
 \end{figure}
 
