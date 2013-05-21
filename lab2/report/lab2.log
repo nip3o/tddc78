@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2012.6.30)  17 MAY 2013 09:01
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2012.6.30)  21 MAY 2013 16:28
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -513,7 +513,7 @@ Package caption Info: float package is loaded.
 Package Fancyhdr Warning: \fancyhead's `E' option without twoside option is use
 less on input line 23.
 
-No file lab2.aux.
+(./lab2.aux)
 \openout1 = `lab2.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 48.
@@ -528,7 +528,7 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 48.
 LaTeX Font Info:    ... okay on input line 48.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 48.
 LaTeX Font Info:    ... okay on input line 48.
-(/usr/local/texlive/2012/texmf-dist/tex/context/base/supp-pdf.mkii
+ (/usr/local/texlive/2012/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count121
 \scratchdimen=\dimen154
@@ -628,83 +628,90 @@ Underfull \hbox (badness 10000) in paragraph at lines 55--58
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 59--61
+Underfull \hbox (badness 10000) in paragraph at lines 59--70
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 62--63
+Underfull \hbox (badness 10000) in paragraph at lines 71--73
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 65--66
+Underfull \hbox (badness 10000) in paragraph at lines 76--81
 
  []
 
-<processor.png, id=1, 240.4182pt x 159.4758pt>
+
+Underfull \hbox (badness 10000) in paragraph at lines 82--87
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 88--95
+
+ []
+
+[1
+
+{/usr/local/texlive/2012/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+<processor.png, id=11, 240.4182pt x 159.4758pt>
 File: processor.png Graphic file (type png)
  <use processor.png>
-Package pdftex.def Info: processor.png used on input line 73.
+Package pdftex.def Info: processor.png used on input line 103.
 (pdftex.def)             Requested size: 240.4176pt x 159.4754pt.
 
-<image.png, id=3, 220.6644pt x 133.4586pt>
+<image.png, id=13, 220.6644pt x 133.4586pt>
 File: image.png Graphic file (type png)
  <use image.png>
-Package pdftex.def Info: image.png used on input line 80.
+Package pdftex.def Info: image.png used on input line 110.
 (pdftex.def)             Requested size: 220.66385pt x 133.45827pt.
 
-<scale.png, id=4, 223.5552pt x 137.313pt>
+<scale.png, id=14, 223.5552pt x 137.313pt>
 File: scale.png Graphic file (type png)
  <use scale.png>
-Package pdftex.def Info: scale.png used on input line 87.
+Package pdftex.def Info: scale.png used on input line 117.
 (pdftex.def)             Requested size: 223.55464pt x 137.31265pt.
 
-<processorBlur.png, id=5, 204.2832pt x 147.9126pt>
+<processorBlur.png, id=15, 204.2832pt x 147.9126pt>
 File: processorBlur.png Graphic file (type png)
  <use processorBlur.png>
-Package pdftex.def Info: processorBlur.png used on input line 94.
+Package pdftex.def Info: processorBlur.png used on input line 124.
 (pdftex.def)             Requested size: 204.28268pt x 147.91223pt.
 
-<imageBlur.png, id=6, 225.0006pt x 139.2402pt>
+<imageBlur.png, id=16, 225.0006pt x 139.2402pt>
 File: imageBlur.png Graphic file (type png)
  <use imageBlur.png>
-Package pdftex.def Info: imageBlur.png used on input line 101.
+Package pdftex.def Info: imageBlur.png used on input line 131.
 (pdftex.def)             Requested size: 225.00003pt x 139.23985pt.
 
-<scaleBlur.png, id=7, 238.491pt x 143.5764pt>
+<scaleBlur.png, id=17, 238.491pt x 143.5764pt>
 File: scaleBlur.png Graphic file (type png)
  <use scaleBlur.png>
-Package pdftex.def Info: scaleBlur.png used on input line 108.
+Package pdftex.def Info: scaleBlur.png used on input line 138.
 (pdftex.def)             Requested size: 238.4904pt x 143.57603pt.
- [1
-
-{/usr/local/texlive/2012/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2 <./p
-rocessor.png> <./image.png> <./scale.png>] [3 <./processorBlur.png> <./imageBlu
-r.png> <./scaleBlur.png>] (./lab2.aux)
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
- ) 
+ [2 <./processor.png> <./image.png>] [3 <./scale.png> <./processorBlur.png> <./
+imageBlur.png>] [4 <./scaleBlur.png>] (./lab2.aux) ) 
 Here is how much of TeX's memory you used:
- 5462 strings out of 493488
- 78545 string characters out of 3141326
- 155501 words of memory out of 3000000
+ 5464 strings out of 493488
+ 78563 string characters out of 3141326
+ 153549 words of memory out of 3000000
  8672 multiletter control sequences out of 15000+200000
  12483 words of font info for 33 fonts, out of 3000000 for 9000
  957 hyphenation exceptions out of 8191
- 44i,10n,43p,672b,300s stack positions out of 5000i,500n,10000p,200000b,50000s
-{/usr/local/texlive/2012/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}
-</usr/local/texlive/2012/texmf-dist/fonts/type1/public/cm-super/sfbx1200.pfb></
-usr/local/texlive/2012/texmf-dist/fonts/type1/public/cm-super/sfbx1440.pfb></us
-r/local/texlive/2012/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb></usr/
-local/texlive/2012/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/lo
-cal/texlive/2012/texmf-dist/fonts/type1/public/cm-super/sfrm1728.pfb></usr/loca
-l/texlive/2012/texmf-dist/fonts/type1/public/cm-super/sfsl1000.pfb>
-Output written on lab2.pdf (3 pages, 153293 bytes).
+ 44i,10n,43p,266b,300s stack positions out of 5000i,500n,10000p,200000b,50000s
+{/usr/local/texlive/2012/te
+xmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}</usr/local/texlive/2012/texm
+f-dist/fonts/type1/public/cm-super/sfbx1200.pfb></usr/local/texlive/2012/texmf-
+dist/fonts/type1/public/cm-super/sfbx1440.pfb></usr/local/texlive/2012/texmf-di
+st/fonts/type1/public/cm-super/sfrm1000.pfb></usr/local/texlive/2012/texmf-dist
+/fonts/type1/public/cm-super/sfrm1200.pfb></usr/local/texlive/2012/texmf-dist/f
+onts/type1/public/cm-super/sfrm1728.pfb></usr/local/texlive/2012/texmf-dist/fon
+ts/type1/public/cm-super/sfsl1000.pfb>
+Output written on lab2.pdf (4 pages, 154691 bytes).
 PDF statistics:
- 52 PDF objects out of 1000 (max. 8388607)
- 28 compressed objects within 1 object stream
+ 55 PDF objects out of 1000 (max. 8388607)
+ 30 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  31 words of extra memory for PDF output out of 10000 (max. 10000000)
 

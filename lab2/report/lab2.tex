@@ -56,29 +56,59 @@ This program calculates the average intensity of the image and makes all
 pixels with a higher-than-average value white, and all other pixels
 black.\\
 
-The whole image is read on the root node. The root node also calculates
-the  average intensity of the image. Now a data structure is created for each new thread that is to be created. The structure contains the intensity level, the image itself as well as start and end value that defines where on the image each thread is going to work. The thread is created and each of them start to work in their part, since memory is shared the whole image is done when each thread is done. Each thread is operating on different parts of the image so there is no risk of memory being overwritten.\\
+The whole image is read on the main thread. It also calculates the
+average intensity of the image. A data structure is created for each new
+thread that is to be created. This structure contains the intensity
+level, a pointer to the image itself as well as a start and an end value
+that defines the area of the image on which the thread is going to apply
+the filter. The threads is created and each of them start to work in
+their part, since memory is shared the whole image is done when all
+threads is done. Each thread is operating on different parts of the
+image so there is no risk of memory being overwritten. It is also not
+dependent on any other parts of the image, thus making this filter easy
+to parallelize.\\
 
-When each thread is done the root writes the resulting image to disk.\\
+When each thread is done, threads are joined again and the main thread
+writes the resulting image to disk.\\
 
 \subsection{Blur filter}
-For each pixel this program calculates the average color of the neighbors with a given radius, of the pixel and sets the pixels color to the average. This gives a blurred effect over the whole image with a small radius giving almost the same image back and a big radius gives a very blurry image.\\
 
-The whole image is read on the root node and then the intervals that each processor is going to work in is calculated and transmitted with scatterv. The reason that scatterv is necessary is because there\rq{}s a lot of dependencies between each chunk of the image so each processor need a bit more data so it can read all neighbors, otherwise there will be some broken lines in the image. Now each chunk is iterated by the blur filter and then transmitted to the root node with gatherv, the root node must take special care to get rid of some overhead created by the sending of extra data. This is done by pointing a bit forward in the array storing the image.
+For each pixel this program calculates the average color of the
+neighbors with a given radius, of the pixel and sets the pixels color to
+the average. This gives a blurred effect over the whole image with a
+small radius giving almost the same image back, and a large radius gives a
+very blurry image.\\
+
+Just as in the threshold filter, the image is read by the root node.
+Gaussian weights needed for the filter is also calculated here. The
+structure used for passing parameters to the threds contains some
+additional data compared to the thresh filter, such as the generated
+Gaussian weights and the blurring radius.\\
+
+Since the resulting value of each pixel depends on neighbour pixel data,
+we use different arrays for reading than for writing the resulting
+(blurred) image. This way, we do not need any more synchronization since
+all write operations is done on different parts of the image. We have
+also changed the implementation of the blur filter, so that it only
+filters a certain part of the image, depending on the start and end
+values calculated by the main thread.\\
+
+After running the filter, threads are joined and the result is written
+to disk by the main thread.
 
 \section{Execution times}
 Below are figures showing the execution times.
 \begin{figure}
   \centering
   \includegraphics{processor.png}
-  \caption{Using the same amount of nodes on differente images. (Thresh)}
+  \caption{Using the same amount of nodes on different images. (Thresh)}
   \label{tab:fig1}
 \end{figure}
-  
+
 \begin{figure}
   \centering
   \includegraphics{image.png}
-  \caption{Using the same image with different amount of modes. (Thresh)}
+  \caption{Using the same image with different amount of nodes. (Thresh)}
   \label{tab:fig2}
 \end{figure}
 
@@ -92,14 +122,14 @@ Below are figures showing the execution times.
 \begin{figure}
   \centering
   \includegraphics{processorBlur.png}
-  \caption{Using the same amount of nodes on differente images. (Blur)}
+  \caption{Using the same amount of nodes on different images. (Blur)}
   \label{tab:fig4}
 \end{figure}
 
 \begin{figure}
   \centering
   \includegraphics{imageBlur.png}
-  \caption{Using the same image with different amount of modes. (Blur)}
+  \caption{Using the same image with different amount of nodes. (Blur)}
   \label{tab:fig5}
 \end{figure}
 
