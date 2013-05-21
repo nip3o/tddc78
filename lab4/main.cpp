@@ -1,9 +1,6 @@
-#define _MPI
-
-#ifdef _MPI
 #include <mpi.h>
-#endif
 
+#include <time.h>
 #include <vector>
 #include <math.h>
 #include <cstdlib>
@@ -15,18 +12,14 @@
 
 #define ROOT 0
 
-void print_pcoord(pcord_t c) {
-    printf("x %.2f, y %.2f, vx %.2f, vy %.2f\n", c.x, c.y, c.vx, c.vy);
-}
-
 int destination(const int area_size, pcord_t c) {
     return (int)c.x / area_size;
 }
 
 int main(int argc, char *argv[]) {
     int taskid = 0, ntasks = 2;
+    struct timespec stime, etime;
 
-#ifdef _MPI
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
     MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
@@ -36,7 +29,6 @@ int main(int argc, char *argv[]) {
 
     MPI_Type_contiguous( 4, MPI_FLOAT, &pcoord_mpi_type );
     MPI_Type_commit(&pcoord_mpi_type);
-#endif
 
     const int AREA_SIZE = BOX_HORIZ_SIZE / ntasks;
     std::vector<pcord_t>* travellers = new std::vector<pcord_t>[ntasks];
@@ -66,19 +58,19 @@ int main(int argc, char *argv[]) {
         c.vx = r * cos(angle);
         c.vy = r * sin(angle);
 
-//        print_pcoord(c);
-
         p.pcord = c;
         p.ptype = 0;
 
         particles.push_back(p);
     }
 
-//    printf("Created %d particles\n", (int)particles.size());
     int new_destination;
     float collission;
     pcord_t* recieve_buffer;
     recieve_buffer = new pcord_t[PARTICLE_BUFFER_SIZE];
+
+    clock_gettime(CLOCK_REALTIME, &stime);
+
 
     for (int t = 0; t < MAX_TIME; ++t) {
         int i = 0;
@@ -124,22 +116,19 @@ int main(int argc, char *argv[]) {
 
         pcord_t cord;
         particle_t particle;
-
-#ifdef _MPI
         MPI_Request req;
+        int sent_particles = 0;
 
         // Send data asynchronously to all the other nodes
         for (int i = 0; i < ntasks; ++i) {
             if (i != taskid) {
- //               for (int j = 0; j < travellers[i].size(); ++j) {
- //                   printf("%d Sending x=%.2f, y=%.2f, vx=%.2f, vy=%.2f \n", i, travellers[i][j].x, travellers[i][j].y, travellers[i][j].vx, travellers[i][j].vy);
- //               }
-
-
                 // Send data to node i
                 MPI_Isend(&travellers[i][0], travellers[i].size(), pcoord_mpi_type, i, 0, MPI_COMM_WORLD, &req);
+                sent_particles += travellers[i].size();
             }
         }
+
+        printf("Task %d sent %d particles, t=%d\n", taskid, sent_particles, t);
 
         // Recieve data from all the other nodes
         for (int j = 0; j < ntasks - 1; ++j) {
@@ -149,10 +138,7 @@ int main(int argc, char *argv[]) {
                 MPI_Iprobe(MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &flag, &status);
             }
             MPI_Get_count(&status, pcoord_mpi_type, &recieved_length);
-
-//            printf("%d Recieved message with length %d\n", taskid, recieved_length);
             MPI_Recv(recieve_buffer, recieved_length, pcoord_mpi_type, status.MPI_SOURCE, 0, MPI_COMM_WORLD,  MPI_STATUS_IGNORE);
-//            printf("%d Recieved\n", taskid);
 
             for (int k = 0; k < recieved_length; ++k) {
                 pcord_t coord;
@@ -164,36 +150,28 @@ int main(int argc, char *argv[]) {
                 particle.pcord = coord;
                 particle.ptype = 0;
                 particles.push_back(particle);
-
-//                printf("%d Recieving x=%.2f, y=%.2f, vx=%.2f, vy=%.2f \n", taskid, particle.pcord.x, particle.pcord.y, particle.pcord.vx, particle.pcord.vy);
             }
         }
 
-//        printf("Daarn fine barrier\n");
         MPI_Barrier(MPI_COMM_WORLD);
-//        printf("Passed\n");
 
         for (int i = 0; i < ntasks; ++i) {
             travellers[i].clear();
- //           printf("%d Cleared\n", taskid);
         }
-#endif
-
     } // end timestep-loop
 
-#ifdef _MPI
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Reduce(&local_total_momentum, &total_momentum, ntasks, MPI_DOUBLE, MPI_SUM, ROOT, MPI_COMM_WORLD);
 
     if (taskid == ROOT) {
         printf("Total pressure is %e\n", total_momentum / (MAX_TIME * WALL_LENGTH));
+
+        clock_gettime(CLOCK_REALTIME, &etime);
+        printf("Everything took: %g secs\n", (etime.tv_sec  - stime.tv_sec) +
+               1e-9*(etime.tv_nsec  - stime.tv_nsec));
     }
 
-    // delete[] recieve_buffer;
-
     MPI_Finalize();
-//    printf("Finalized\n");
-#endif
 
     return 0;
 }
