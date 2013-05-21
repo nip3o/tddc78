@@ -97,47 +97,48 @@ After running the filter, threads are joined and the result is written
 to disk by the main thread.
 
 \section{Execution times}
-Below are figures showing the execution times.
-\begin{figure}
+In figure \ref{fig:fig1} and figure \ref{fig:fig4} the same number of nodes is used on different images and we see that the execution time is increased in a linear manor, for the thresh and blur filter. Figure \ref{fig:fig2} and figure \ref{fig:fig5} shows how the execution time decreases with increasing number of nodes for thresh and blur. Figure \ref{fig:fig3} and figure \ref{fig:fig6} shows how the same increase in image size and number of nodes give the same execution time, for \ref{fig:fig6} this is not exactly the case, possibly due to communication overhead when using too many nodes. 
+
+\begin{figure}[h]
   \centering
   \includegraphics{processor.png}
   \caption{Using the same amount of nodes on different images. (Thresh)}
-  \label{tab:fig1}
+  \label{fig:fig1}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[h]
   \centering
   \includegraphics{image.png}
   \caption{Using the same image with different amount of nodes. (Thresh)}
-  \label{tab:fig2}
+  \label{fig:fig2}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[h]
   \centering
   \includegraphics{scale.png}
-  \caption{Scaling the image at the same rate as the number of nodes. (Thresh)}
-  \label{tab:fig3}
+  \caption{Scaling the image at the same rate as the number of nodes. Using 2, 4, 8 and 38 nodes. (Thresh)}
+  \label{fig:fig3}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[h]
   \centering
   \includegraphics{processorBlur.png}
   \caption{Using the same amount of nodes on different images. (Blur)}
-  \label{tab:fig4}
+  \label{fig:fig4}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[h]
   \centering
   \includegraphics{imageBlur.png}
   \caption{Using the same image with different amount of nodes. (Blur)}
-  \label{tab:fig5}
+  \label{fig:fig5}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[h]
   \centering
   \includegraphics{scaleBlur.png}
-  \caption{Scaling the image at the same rate as the number of nodes. (Blur)}
-  \label{tab:fig6}
+  \caption{Scaling the image at the same rate as the number of nodes. Using 2, 4, 8 and 38 nodes. (Blur)}
+  \label{fig:fig6}
 \end{figure}
 
 \end{document}
