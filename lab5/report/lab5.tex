@@ -1,0 +1,68 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+\documentclass[a4paper]{article}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools}
+\usepackage[pdftex]{graphicx}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{geometry}
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+
+%%% HEADERS & FOOTERS
+
+\author{Jonathan Karlsson - jonka293 - 890201-1991 \and Niclas Olofsson - nicol271 - 900904-5338}
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{1pt} % customise the layout...
+\fancyhead[LO,LE]{Laboration 2 - TDDC78}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+\setlength{\parindent}{0pt}
+
+%%%% SECTION TITLE APPEARANCE
+
+%\usepackage{sectsty}
+%\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+%% (This matches ConTeXt defaults)
+%
+%%%% ToC (table of contents) APPEARANCE
+%\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+%\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+%\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+%\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+
+%%% END Article customizations
+
+%%% The "real" document content comes below...
+
+\title{Laboration 5 - TDDC78}
+
+%\date{} % Activate to display a given date or no date (if empty),
+% otherwise the current date is printed
+
+\begin{document}
+
+\maketitle
+
+\section{TotalView}
+
+
+\section{Tracing with ITAC}
+
+We compiled the program using ITAC, ran it with mpirun on four nodes,
+and analyzed the result with the Intel Trace Analyzer program.
+
+
+\begin{figure}
+  \centering
+  \includegraphics{count.png}
+  \caption{Count graph of the total momentum for each node}
+  \label{fig1}
+\end{figure}
+
+\end{document}

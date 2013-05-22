@@ -1,5 +1,6 @@
 #include <mpi.h>
 
+#include <VT.h>
 #include <time.h>
 #include <vector>
 #include <math.h>
@@ -23,6 +24,18 @@ int main(int argc, char *argv[]) {
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
     MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+
+    int vt_class, vt_collission, vt_comm, vt_sync;
+    VT_classdef("partsim", &vt_class);
+
+    VT_funcdef("collission", vt_class, &vt_collission);
+    VT_funcdef("communication", vt_class, &vt_comm);
+    VT_funcdef("synchronization", vt_class, &vt_sync);
+
+    double bounds[2];
+
+    int pressure_counter;
+    VT_countdef("pressure", vt_class, VT_COUNT_FLOAT, VT_GROUP_PROCESS, bounds, "p", &pressure_counter);
 
     MPI_Status status;
     MPI_Datatype pcoord_mpi_type;
@@ -71,7 +84,6 @@ int main(int argc, char *argv[]) {
 
     clock_gettime(CLOCK_REALTIME, &stime);
 
-
     for (int t = 0; t < MAX_TIME; ++t) {
         int i = 0;
         int particles_size = particles.size();
@@ -79,6 +91,7 @@ int main(int argc, char *argv[]) {
         while (i < particles_size) {
             collission = -1;
 
+            VT_enter(vt_collission, VT_NOSCL);
             // Check if the particle collides with any other particle
             for (int j = i + 1; (j < particles.size()); ++j) {
                 collission = collide(&particles[i].pcord,
@@ -92,6 +105,7 @@ int main(int argc, char *argv[]) {
                     continue;
                 }
             }
+            VT_leave(VT_NOSCL);
 
             if (collission < 0) {
                 // The particle did not collide, move it
@@ -119,6 +133,7 @@ int main(int argc, char *argv[]) {
         MPI_Request req;
         int sent_particles = 0;
 
+        VT_enter(vt_comm, VT_NOSCL);
         // Send data asynchronously to all the other nodes
         for (int i = 0; i < ntasks; ++i) {
             if (i != taskid) {
@@ -128,7 +143,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        printf("Task %d sent %d particles, t=%d\n", taskid, sent_particles, t);
+        //printf("Task %d sent %d particles, t=%d\n", taskid, sent_particles, t);
 
         // Recieve data from all the other nodes
         for (int j = 0; j < ntasks - 1; ++j) {
@@ -152,16 +167,25 @@ int main(int argc, char *argv[]) {
                 particles.push_back(particle);
             }
         }
+        VT_leave(VT_NOSCL);
 
-        MPI_Barrier(MPI_COMM_WORLD);
+        VT_enter(vt_sync, VT_NOSCL);
+            MPI_Barrier(MPI_COMM_WORLD);
+        VT_leave(VT_NOSCL);
 
         for (int i = 0; i < ntasks; ++i) {
             travellers[i].clear();
         }
+
+        VT_countval(1, &pressure_counter, &local_total_momentum);
     } // end timestep-loop
+
+    VT_enter(vt_sync, VT_NOSCL);
 
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Reduce(&local_total_momentum, &total_momentum, ntasks, MPI_DOUBLE, MPI_SUM, ROOT, MPI_COMM_WORLD);
+
+    VT_leave(VT_NOSCL);
 
     if (taskid == ROOT) {
         printf("Total pressure is %e\n", total_momentum / (MAX_TIME * WALL_LENGTH));
