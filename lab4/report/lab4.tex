@@ -52,7 +52,7 @@
 \section{Program description}
 This program simulates a number of particles with a certain initial
 speed and position, moving inside a box. Particles can collide with each
-other, and with the walls of the box. Collissions with the walls increase
+other, and with the walls of the box. Collisions with the walls increase
 the pressure inside the box, and the program calculates the total pressure
 at the end of the simulation.\\
 
@@ -65,7 +65,7 @@ On each node, we check if any of the particles collides with any other
 particle on the same node. If they collide, the particles interact with
 each other so that their velocities changes according to the laws of
 physics. The particle is moved in the same direction as before, if no
-collission has occurred.\\
+collision has occurred.\\
 
 If the particle collides with a wall after it has been moved, this
 increases the total momentum of that part of the box. If the movement
@@ -73,18 +73,18 @@ of the particle has resulted the particle to move into an area belonging
 to another node, it is added to an array of particles to send to the new
 node, and removed from the vector of particles on the current node.\\
 
-At the end of each timestep, the coordinates for each particle that
+At the end of each time-step, the coordinates for each particle that
 should move to another node is sent to that node. Since the particle
 type only contains an unused integer for future use, and the
 coordinates, we have chosen to simplify the communication by only
 sending the coordinates itself.\\
 
-We also do some unnessecary communication by sending an empty array even
+We also do some unnecessary communication by sending an empty array even
 if there is no particles to transfer. We are also not considering the
-fact that particles will only move to their neighbours and not across
+fact that particles will only move to their neighbors and not across
 multiple areas as long as the area size is larger than the speed.\\
 
-After all timesteps, we use MPI\_Reduce() to sum the total momentum of
+After all time-steps, we use MPI\_Reduce() to sum the total momentum of
 all parts of the box together. The root node calculates the pressure and
 prints it to screen.
 
@@ -93,7 +93,7 @@ prints it to screen.
 \subsection{Choice of particle distribution} The box is divided in one
 dimension vertically (i.e. the Y-axis is split up over different nodes).
 The main reason for this was simplicity, but it also has an advantage of
-just having at most to neighbours to send particles between (even
+just having at most two neighbors to send particles between (even
 though we currently do not take advantage of this in our
 implementation).\\
 
@@ -102,7 +102,7 @@ small maximum value of its Y-axis) since particles then will pass over
 each part of the box in a very short time.\\
 
 This also shows when measuring the number of particles passed between
-nodes on each timestep for the same amount of initial particles. With a
+nodes on each time-step for the same amount of initial particles. With a
 box with X:Y-ratio 10:1, on average 9.6 particles passed between nodes.
 With a ratio of 1:10, the same amount was 94 particles.\\
 
@@ -122,7 +122,7 @@ other words, the gas law seems to be correct based on our simulation.\\
 \section{Execution times}
 
 Since the number of particles increases as the number of nodes
-increases, we get no performance inrease by adding more nodes. As seen
+increases, we get no performance increase by adding more nodes. As seen
 in Figure \ref{fig1}, we also get slightly more overhead since more
 particles will travel between more nodes.\\
 
@@ -134,9 +134,9 @@ particles will travel between more nodes.\\
 \end{figure}
 
 The increase of number of particles gives an exponential growth of the
-execution time. This is because of the need for neighbour-checking,
+execution time. This is because of the need for neighbor-checking,
 which means that a double amount of particles also means a double amount
-of neighbours to check for each particle, on average. We can see this in
+of neighbors to check for each particle, on average. We can see this in
 Figure \ref{fig2}.\\
 
 \begin{figure}
