@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2012.6.30)  22 MAY 2013 15:20
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2012.6.30)  22 MAY 2013 15:48
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -624,42 +624,79 @@ e
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: subfig package v1.3 is loaded.
 Package caption Info: End \AtBeginDocument code.
-<count.png, id=1, 1426.32875pt x 589.20125pt>
-File: count.png Graphic file (type png)
- <use count.png>
-Package pdftex.def Info: count.png used on input line 63.
-(pdftex.def)             Requested size: 1426.32529pt x 589.1998pt.
 
-Overfull \hbox (1008.07161pt too wide) in paragraph at lines 63--64
- [][] 
+Underfull \hbox (badness 10000) in paragraph at lines 71--78
+
  []
 
 
-LaTeX Warning: Float too large for page by 19.6696pt on input line 66.
+Underfull \hbox (badness 10000) in paragraph at lines 79--84
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 85--91
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 92--97
+
+ []
+
+<global_timeline.png, id=1, 1427.3325pt x 594.22pt>
+File: global_timeline.png Graphic file (type png)
+ <use global_timeline.png>
+Package pdftex.def Info: global_timeline.png used on input line 100.
+(pdftex.def)             Requested size: 428.20305pt x 178.26736pt.
+
+Overfull \hbox (9.94937pt too wide) in paragraph at lines 100--101
+ [][] 
+ []
 
 [1
 
 {/usr/local/texlive/2012/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-[2 <./count.png>] (./lab5.aux) ) 
+<group_times.png, id=11, 894.34125pt x 467.7475pt>
+File: group_times.png Graphic file (type png)
+ <use group_times.png>
+Package pdftex.def Info: group_times.png used on input line 107.
+(pdftex.def)             Requested size: 447.16953pt x 233.87317pt.
+
+Overfull \hbox (28.91585pt too wide) in paragraph at lines 107--108
+ [][] 
+ []
+
+<count.png, id=12, 1426.32875pt x 589.20125pt>
+File: count.png Graphic file (type png)
+ <use count.png>
+Package pdftex.def Info: count.png used on input line 114.
+(pdftex.def)             Requested size: 427.90193pt x 176.76173pt.
+
+Overfull \hbox (9.64825pt too wide) in paragraph at lines 114--115
+ [][] 
+ []
+
+[2 <./global_timeline.png> <./group_times.png>] [3 <./count.png>] (./lab5.aux) 
+) 
 Here is how much of TeX's memory you used:
- 5376 strings out of 493488
- 77304 string characters out of 3141326
- 150434 words of memory out of 3000000
- 8591 multiletter control sequences out of 15000+200000
+ 5389 strings out of 493488
+ 77539 string characters out of 3141326
+ 152450 words of memory out of 3000000
+ 8602 multiletter control sequences out of 15000+200000
  11707 words of font info for 32 fonts, out of 3000000 for 9000
  957 hyphenation exceptions out of 8191
- 44i,10n,43p,913b,294s stack positions out of 5000i,500n,10000p,200000b,50000s
-{/usr/local/texlive/2012/texmf-dist/fonts/enc/d
-vips/cm-super/cm-super-t1.enc}</usr/local/texlive/2012/texmf-dist/fonts/type1/p
-ublic/cm-super/sfbx1440.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/pub
-lic/cm-super/sfrm1000.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/publi
-c/cm-super/sfrm1200.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/public/
-cm-super/sfrm1728.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/public/cm
--super/sfsl1000.pfb>
-Output written on lab5.pdf (2 pages, 80719 bytes).
+ 44i,10n,43p,266b,290s stack positions out of 5000i,500n,10000p,200000b,50000s
+{/usr/local/texlive/2012/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}<
+/usr/local/texlive/2012/texmf-dist/fonts/type1/public/cm-super/sfbx1440.pfb></u
+sr/local/texlive/2012/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb></usr
+/local/texlive/2012/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/l
+ocal/texlive/2012/texmf-dist/fonts/type1/public/cm-super/sfrm1728.pfb></usr/loc
+al/texlive/2012/texmf-dist/fonts/type1/public/cm-super/sfsl1000.pfb>
+Output written on lab5.pdf (3 pages, 118280 bytes).
 PDF statistics:
- 35 PDF objects out of 1000 (max. 8388607)
- 23 compressed objects within 1 object stream
+ 40 PDF objects out of 1000 (max. 8388607)
+ 25 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 6 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 16 words of extra memory for PDF output out of 10000 (max. 10000000)
 
