@@ -120,7 +120,6 @@ is approximately $1/10$ of before, as expected from the formula. In
 other words, the gas law seems to be correct based on our simulation.\\
 
 \section{Execution times}
-
 Since the number of particles increases as the number of nodes
 increases, we get no performance increase by adding more nodes. As seen
 in Figure \ref{fig1}, we also get slightly more overhead since more
@@ -129,8 +128,21 @@ particles will travel between more nodes.\\
 \begin{figure}
   \centering
   \includegraphics{processor_scale.png}
-  \caption{Increasing the number of nodes, same size and initial number of particles}
+  \caption{Increasing the number of nodes, same size and initial number of particles per node}
   \label{fig1}
+\end{figure}
+
+If we lower the number of initial particles per node to match the
+increment of nodes, thus keeping the total number of particles fixed, we
+see that the execution time decreases while number of nodes increases as in Figure \ref{fig0}. A
+better scaling could probably be achieve with a higher number of total
+particles, in our experiment we used only 1000 total particles.\\
+
+\begin{figure}
+  \centering
+  \includegraphics{scale.png}
+  \caption{Increasing the number of nodes, same size and total number of particles}
+  \label{fig0}
 \end{figure}
 
 The increase of number of particles gives an exponential growth of the
@@ -142,7 +154,7 @@ Figure \ref{fig2}.\\
 \begin{figure}
   \centering
   \includegraphics{particles_scale.png}
-  \caption{Increasing the number of initial particles, same size and number of nodes}
+  \caption{Increasing the number of initial particles per node, same size and number of nodes}
   \label{fig2}
 \end{figure}
 

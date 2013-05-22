@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1369213997 "lab4.tex" "lab4.pdf" "lab4" 1369213998
+["pdflatex"] 1369259126 "lab4.tex" "lab4.pdf" "lab4" 1369259381
   "/usr/local/texlive/2012/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc" 1136849721 2971 def0b6c1f0b107b3b936def894055589 ""
   "/usr/local/texlive/2012/texmf-dist/fonts/map/fontname/texfonts.map" 1272929888 3287 e6b82fe08f5336d4d5ebc73fb1152e87 ""
   "/usr/local/texlive/2012/texmf-dist/fonts/tfm/jknappen/ec/ecbx1200.tfm" 1136768653 3584 402da0b29eafbad07963b1224b222f18 ""
@@ -87,10 +87,11 @@
   "/usr/local/texlive/2012/texmf-var/web2c/pdftex/pdflatex.fmt" 1341108725 3691572 80746d7cec090b0770bc87079bef471d ""
   "/usr/local/texlive/2012/texmf.cnf" 1341108668 572 7ea7194897937febeb63145e1c3a1f03 ""
   "/usr/local/texlive/2012/texmf/web2c/texmf.cnf" 1336865692 31299 729e216d9b945005c0d4b079c0500bc9 ""
-  "lab4.aux" 1369213998 1103 47c9527d3d29b515711899099b490fe0 ""
-  "lab4.tex" 1369213976 6478 607099c45d9c75386d660f367d89b11f ""
+  "lab4.aux" 1369259126 1300 eaf22d6a1fb2d44499652922f4dd3468 ""
+  "lab4.tex" 1369259123 7039 bc2b2d3e2ea307909ce0c418ad65877a ""
   "particles_scale.png" 1369172654 30557 4835fc71e455237e755fbb4098489f15 ""
   "processor_scale.png" 1369172701 33187 fbcbfa61b174d745c0f4167a379f8c68 ""
+  "scale.png" 1369258614 36010 5cdd1c59fc3baad1d2324d211781ed12 ""
   (generated)
   "lab4.aux"
   "lab4.log"

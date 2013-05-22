@@ -135,6 +135,9 @@ INPUT /usr/local/texlive/2012/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7
 INPUT processor_scale.png
 INPUT ./processor_scale.png
 INPUT ./processor_scale.png
+INPUT scale.png
+INPUT ./scale.png
+INPUT ./scale.png
 INPUT particles_scale.png
 INPUT ./particles_scale.png
 INPUT ./particles_scale.png
