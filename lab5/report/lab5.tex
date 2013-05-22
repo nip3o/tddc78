@@ -55,14 +55,52 @@
 \section{Tracing with ITAC}
 
 We compiled the program using ITAC, ran it with mpirun on four nodes,
-and analyzed the result with the Intel Trace Analyzer program.
+and analyzed the result with the Intel Trace Analyzer program. Overall,
+this was easier to do than to get TotalView up and running. On the other
+hand, it took some time to understand the user interface and how to view
+information for our own groups, not just for the default ones. The user
+interface does not work very well, at least not over X11, but it is
+usable for shorter usage sessions.\\
 
+From the global timeline in Figure \ref{timeline}, we can see that it
+spends quite much time outside our defined groups in the beginning. This
+is due to creation of particles. Communication and synchronization is
+only done at the end of each timestep, and when using MPI\_Reduce() at
+the end.\\
 
-\begin{figure}
+Figure \ref{time} show total time spent per group and node. Collission
+check is the group that takes most time, which is understandable since
+it is the most work-heavy part of the program. Communication and
+synchronization takes little time compared to the rest. However, it is
+quite interesting that we spend almost as much time waiting for
+synchronization as we spend on sending actual data.\\
+
+Figure \ref{count} shows a counter of the total momentum for each node,
+representing the pressure. We see that the pressure is much higher on
+two of our four nodes. This is understandable, since the nodes in the
+end of the box has walls on three sides, and the other nodes just has
+two, shorter walls.\\
+
+\begin{figure}[H]
   \centering
-  \includegraphics{count.png}
-  \caption{Count graph of the total momentum for each node}
-  \label{fig1}
+  \includegraphics[scale=0.3]{global_timeline.png}
+  \caption{Global timeline showing usage of the different groups over time}
+  \label{timeline}
 \end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.5]{group_times.png}
+  \caption{Time spent in the different groups, for each node}
+  \label{time}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.3]{count.png}
+  \caption{Count graph of the total momentum for each node}
+  \label{count}
+\end{figure}
+
 
 \end{document}
