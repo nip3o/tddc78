@@ -99,12 +99,12 @@ implementation).\\
 
 However, this is not very beneficial if the box is narrow (i.e. has a
 small maximum value of its Y-axis) since particles then will pass over
-each part of the box very fast.\\
+each part of the box in a very short time.\\
 
 This also shows when measuring the number of particles passed between
 nodes on each timestep for the same amount of initial particles. With a
-box with X:Y ratio 10:1, on average 9.6 particles passed between nodes.
-With a ratio of 1:10, the same amount was 94 particles.
+box with X:Y-ratio 10:1, on average 9.6 particles passed between nodes.
+With a ratio of 1:10, the same amount was 94 particles.\\
 
 
 \subsection{Verifying the gas law}
@@ -117,14 +117,14 @@ formula. $n=2000$ gives $p=1.1$.\\
 
 With $n=2000, V=10^{3} \times 10^{4}$, the pressure drops to 0.09 which
 is approximately $1/10$ of before, as expected from the formula. In
-other words, the gas law seems to be correct based on our simulation.
+other words, the gas law seems to be correct based on our simulation.\\
 
 \section{Execution times}
 
 Since the number of particles increases as the number of nodes
 increases, we get no performance inrease by adding more nodes. As seen
 in Figure \ref{fig1}, we also get slightly more overhead since more
-particles will travel between more nodes.
+particles will travel between more nodes.\\
 
 \begin{figure}
   \centering
@@ -134,8 +134,10 @@ particles will travel between more nodes.
 \end{figure}
 
 The increase of number of particles gives an exponential growth of the
-execution time, since the particles increase on each node, not just on
-all nodes in total. We can see this in Figure \ref{fig2}.
+execution time. This is because of the need for neighbour-checking,
+which means that a double amount of particles also means a double amount
+of neighbours to check for each particle, on average. We can see this in
+Figure \ref{fig2}.\\
 
 \begin{figure}
   \centering
@@ -149,7 +151,7 @@ all nodes in total. We can see this in Figure \ref{fig2}.
 Changing the size of the area does not affect the runtime very much. We
 have noticed that a smaller area takes slightly longer time than a
 larger box, which is natural since particles will collide with walls and
-to travel between nodes more often than in large boxes.
+to travel between nodes more often than in large boxes.\\
 
 
 \end{document}

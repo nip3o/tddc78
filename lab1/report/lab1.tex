@@ -1,7 +1,7 @@
 % !TEX TS-program = pdflatex
 % !TEX encoding = UTF-8 Unicode
 \documentclass[a4paper]{article}
-\usepackage[swedish]{babel}
+\usepackage[english]{babel}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{mathtools}
@@ -88,7 +88,18 @@ overhead created by the sending of extra data. This is done by pointing
 a bit forward in the array storing the image.
 
 \section{Execution times}
-In figure \ref{fig:fig1} and figure \ref{fig:fig4} the same number of nodes is used on different images and we see that the execution time is increased in a linear manor, for the thresh and blur filter. Figure \ref{fig:fig2} and figure \ref{fig:fig5} shows how the execution time decreases with increasing number of nodes for thresh and blur, in the thresh filter we get a bad scale since the problem size is so small that the communication overhead becomes too large. Figure \ref{fig:fig3} and figure \ref{fig:fig6} shows how the same increase in image size and number of nodes give the same execution time, for \ref{fig:fig6} we notice that the line isn\rq{}t constant as soon as we use more than one processor (more than 16 nodes).
+
+In figure \ref{fig:fig1} and figure \ref{fig:fig4} the same number of
+nodes is used on different images and we see that the execution time is
+increased in a linear manor, for the thresh and blur filter. Figure
+\ref{fig:fig2} and figure \ref{fig:fig5} shows how the execution time
+decreases with increasing number of nodes for thresh and blur, in the
+thresh filter we get a bad scale since the problem size is so small that
+the communication overhead becomes too large. Figure \ref{fig:fig3} and
+figure \ref{fig:fig6} shows how the same increase in image size and
+number of nodes give the same execution time, for \ref{fig:fig6} we
+notice that the line isn\rq{}t constant as soon as we use more than one
+processor (more than 16 nodes).
 
 \begin{figure}[h]
   \centering

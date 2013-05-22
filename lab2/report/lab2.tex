@@ -1,7 +1,7 @@
 % !TEX TS-program = pdflatex
 % !TEX encoding = UTF-8 Unicode
 \documentclass[a4paper]{article}
-\usepackage[swedish]{babel}
+\usepackage[english]{babel}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{mathtools}
@@ -97,7 +97,16 @@ After running the filter, threads are joined and the result is written
 to disk by the main thread.
 
 \section{Execution times}
-In figure \ref{fig:fig1} and figure \ref{fig:fig4} the same number of nodes is used on different images and we see that the execution time is increased in a linear manor, for the thresh and blur filter. Figure \ref{fig:fig2} and figure \ref{fig:fig5} shows how the execution time decreases with increasing number of nodes for thresh and blur. Figure \ref{fig:fig3} and figure \ref{fig:fig6} shows how the same increase in image size and number of nodes give the same execution time, for \ref{fig:fig6} this is not exactly the case, possibly due to communication overhead when using too many nodes. 
+
+In figure \ref{fig:fig1} and figure \ref{fig:fig4} the same number of
+nodes is used on different images and we see that the execution time is
+increased in a linear manor, for the thresh and blur filter. Figure
+\ref{fig:fig2} and figure \ref{fig:fig5} shows how the execution time
+decreases with increasing number of nodes for thresh and blur. Figure
+\ref{fig:fig3} and figure \ref{fig:fig6} shows how the same increase in
+image size and number of nodes give the same execution time, for
+\ref{fig:fig6} this is not exactly the case, possibly due to
+communication overhead when using too many nodes.
 
 \begin{figure}[h]
   \centering
